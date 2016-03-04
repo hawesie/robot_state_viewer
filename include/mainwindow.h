@@ -33,13 +33,21 @@ private slots:
 
     void on_queryButton_clicked();
 
+    void on_labelequalsCBox_clicked(bool checked);
+
+    void on_labelcontainsCBox_clicked(bool checked);
+
+    void on_resetqueryButton_clicked();
+
+    void on_exportjsonButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     RosThread rosthread;
     QThread* thread;
     int maxtimestep;
     std::vector<SOMA2ROINameID> roinameids;
-
+    mongo::BSONObj mainBSONObj;
 };
 
 #endif // MAINWINDOW_H

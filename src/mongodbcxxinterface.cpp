@@ -18,7 +18,7 @@ MongoDBCXXInterface::MongoDBCXXInterface(std::string hostaddress, std::string po
     mongocxx::client conn(uri);
 
 
-    auto collection = conn[database][collectionname];
+  /*  auto collection = conn[database][collectionname];*/
 
     this->collectionname = collectionname;
     this->database = database;

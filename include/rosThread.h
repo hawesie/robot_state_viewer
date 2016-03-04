@@ -32,12 +32,15 @@ public:
      sensor_msgs::PointCloud2 worldstate;
      sensor_msgs::PointCloud2 getSOMA2ObjectCloudsWithTimestep(int timestep);
      void publishSOMA2ObjectClouds(sensor_msgs::PointCloud2 msg);
+     sensor_msgs::PointCloud2 getSOMA2ObjectClouds(const std::vector<soma2_msgs::SOMA2Object>& soma2objects);
      std::string getSOMA2ObjectDateWithTimestep(int timestep);
    //  std::vector<SOMA2ROINameID> getSOMA2ROINames();
      std::string getMapName();
      void drawROIwithID(std::string id);
      soma2_msgs::SOMA2ROIObject getSOMA2ROIwithID(int id);
-     std::vector<soma2_msgs::SOMA2Object> querySOMA2Objects(mongo::BSONObj queryjson);
+     std::vector<soma2_msgs::SOMA2Object> querySOMA2Objects(const mongo::BSONObj& queryobj, int timestep);
+     std::vector<soma2_msgs::SOMA2Object> querySOMA2ObjectsWithDate(const mongo::BSONObj& queryobj);
+
     // std::vector<std::string> getSOMA2ObjectLabels();
 
 
