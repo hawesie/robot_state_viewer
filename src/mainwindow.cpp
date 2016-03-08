@@ -5,14 +5,15 @@
 #include <QTextBrowser>
 
 
-#include <qjson/parser.h>
-
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->mapnamelabel->setText("DB Fetch is in progress...");
+
+    ui->tab->setEnabled(false);
 
     thread = new QThread(this);
 
@@ -51,6 +52,7 @@ void MainWindow::on_timestepSlider_valueChanged(int value)
 {
     // emit sliderValue(value);
 
+
     QString labeltext =  QString::number(value);
 
     labeltext.append(" / ").append(QString::number(maxtimestep+1));
@@ -61,62 +63,57 @@ void MainWindow::on_timestepSlider_valueChanged(int value)
 
     ui->datelabel->setText(QString::fromStdString(date));
 
-    /*if(this->mainBSONObj.isEmpty()){
 
-        rosthread.worldstate =  rosthread.getSOMA2ObjectCloudsWithTimestep(value-1);
+    bool lowerdate = ui->lowerDateCBox->isChecked();
 
-        rosthread.publishSOMA2ObjectClouds(rosthread.worldstate);
+    bool upperdate = ui->upperDateCBox->isChecked();
 
-        return;
-    }*/
- //   else
-   // {
-
-        bool lowerdate = ui->lowerDateCBox->isChecked();
-
-        bool upperdate = ui->upperDateCBox->isChecked();
-
-        if(lowerdate || upperdate)
-        {
-            std::vector<soma2_msgs::SOMA2Object> soma2objects =  rosthread.querySOMA2ObjectsWithDate(this->mainBSONObj);
-
-            ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
-
-            sensor_msgs::PointCloud2 state =  rosthread.getSOMA2ObjectClouds(soma2objects);
-
-            rosthread.publishSOMA2ObjectClouds(state);
-
-            return;
-
-        }
-
-
-
-        std::vector<soma2_msgs::SOMA2Object> soma2objects =  rosthread.querySOMA2Objects(this->mainBSONObj,value-1);
+    if(lowerdate || upperdate)
+    {
+        std::vector<soma2_msgs::SOMA2Object> soma2objects =  rosthread.querySOMA2ObjectsWithDate(this->mainBSONObj);
 
         ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
 
-        sensor_msgs::PointCloud2 state =  rosthread.getSOMA2ObjectClouds(soma2objects);
+        sensor_msgs::PointCloud2 state =  rosthread.getSOMA2CombinedObjectCloud(soma2objects);
 
-        rosthread.publishSOMA2ObjectClouds(state);
+        rosthread.publishSOMA2ObjectCloud(state);
+
+        lastqueryjson = QString::fromStdString(this->mainBSONObj.jsonString(mongo::TenGen,0 ));
+        //Reset the bson obj
+        mongo::BSONObjBuilder mainbuilder;
+
+        this->mainBSONObj = mainbuilder.obj();
+
+        return;
+
+    }
 
 
 
+    std::vector< soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(this->mainBSONObj,value-1);
+
+    ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
+
+    sensor_msgs::PointCloud2 state =  rosthread.getSOMA2CombinedObjectCloud(soma2objects);
+
+    rosthread.publishSOMA2ObjectCloud(state);
 
 
-  //  }
+    lastqueryjson = QString::fromStdString(this->mainBSONObj.jsonString());
+    //Reset the bson obj
+    mongo::BSONObjBuilder mainbuilder;
 
-
+    this->mainBSONObj = mainbuilder.obj();
 
 
 }
 
 void MainWindow::handleMapInfoReceived()
 {
+    ui->tab->setEnabled(true);
 
     // Enable the slider
     ui->timestepSlider->setEnabled(true);
-    connect(this,SIGNAL(sliderValue(int)),&rosthread,SLOT(getSliderValue(int)));
 
 
     /*************Set Map Name***********************/
@@ -127,7 +124,9 @@ void MainWindow::handleMapInfoReceived()
 
 
     /***********************Set Timestep Interval *************************************/
-    MongoDBCXXInterface mongointerface("localhost","62345","labelled_objects","soma2");
+    std::string objectsdbname = this->rosthread.getObjectsDBName();
+
+    MongoDBCXXInterface mongointerface("localhost","62345",objectsdbname,"soma2");
 
     this->maxtimestep = mongointerface.getMaxTimeStep();
 
@@ -180,15 +179,15 @@ void MainWindow::handleMapInfoReceived()
 
     /********************* Publish Objects at world state t = 0 ***********************/
 
+    //  std::vector<std::string>  res =  RosThread::fetchSOMA2ObjectLabels();
 
-
-    std::vector<soma2_msgs::SOMA2Object> soma2objects =  rosthread.querySOMA2Objects(this->mainBSONObj,0);
+  /*  std::vector<soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(this->mainBSONObj,0);
 
     ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
 
-    sensor_msgs::PointCloud2 state =  rosthread.getSOMA2ObjectClouds(soma2objects);
+    sensor_msgs::PointCloud2 state =  rosthread.getSOMA2CombinedObjectCloud(soma2objects);
 
-    rosthread.publishSOMA2ObjectClouds(state);
+    rosthread.publishSOMA2ObjectCloud(state);*/
 
 
     /**********************************************************************************/
@@ -197,15 +196,28 @@ void MainWindow::handleMapInfoReceived()
 }
 void MainWindow::handleSOMA2ObjectLabels(std::vector<std::string> labelnames)
 {
-    ui->labelsComboBox->addItem("");
+    QString dir = QDir::homePath();
 
-    for(int i=0; i < labelnames.size(); i++)
-    {
-        ui->labelsComboBox->addItem(QString::fromStdString(labelnames[i]));
+    dir.append("/").append(".soma2").append("/objectlabels.txt");
+
+    QFile file(dir);
+
+    if(file.open(QFile::ReadOnly)){
+
+        QTextStream stream(&file);
+
+
+        ui->labelsComboBox->addItem("");
+
+        while(!stream.atEnd())
+        {
+            QString str = stream.readLine();
+
+            ui->labelsComboBox->addItem(str);
+
+        }
 
     }
-
-
 }
 void MainWindow::handleSOMA2ROINames(std::vector<SOMA2ROINameID> roinameids)
 {
@@ -235,7 +247,7 @@ void MainWindow::on_roiComboBox_currentIndexChanged(const QString &arg1)
     QStringList numpart = str.split(" ");
 
     if(numpart.size()>=2){
-        qDebug()<<numpart[1];
+       // qDebug()<<numpart[1];
         rosthread.drawROIwithID(numpart[1].toStdString());
     }
     else
@@ -257,45 +269,46 @@ void MainWindow::on_queryButton_clicked()
     bool uppertime = ui->upperTimeCBox->isChecked();
 
 
-    bool lowerdate = ui->lowerDateCBox->isChecked();
+    bool lowerdatecbox = ui->lowerDateCBox->isChecked();
 
-    bool upperdate = ui->upperDateCBox->isChecked();
+    bool upperdatecbox = ui->upperDateCBox->isChecked();
 
     mongo::BSONObjBuilder mainbuilder;
 
-    if(lowerdate || upperdate)
+    if(lowerdatecbox || upperdatecbox)
     {
 
 
-       QDateTime datetime;
-       datetime.setDate(ui->lowerDateEdit->date());
+        QDateTime datetime;
+        datetime.setDate(ui->lowerDateEdit->date());
 
-       QTime time;
+        QTime time;
 
-       time.setHMS(0,0,0);
-       datetime.setTime(time);
+        time.setHMS(0,0,0);
+        datetime.setTime(time);
 
         ulong lowerdate =  datetime.toMSecsSinceEpoch();
 
-        datetime;
+
         datetime.setDate(ui->upperDateEdit->date());
+        time.setHMS(23,59,0);
         datetime.setTime(time);
 
         ulong upperdate = datetime.toMSecsSinceEpoch();
 
         int mode = 0;
 
-        if(lowerdate &&  upperdate)
+        if(lowerdatecbox &&  upperdatecbox)
         {
             mode = 2;
 
         }
-        else if(upperdate)
+        else if(upperdatecbox)
             mode = 1;
 
-      mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2DateQuery(lowerdate,upperdate,mode);
+        mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2DateQuery(lowerdate,upperdate,mode);
 
-      mainbuilder.appendElements(bsonobj);
+        mainbuilder.appendElements(bsonobj);
 
 
     }
@@ -349,13 +362,13 @@ void MainWindow::on_queryButton_clicked()
 
     if(roiintindex > 0){
 
-        qDebug()<<"Current Index"<<roiintindex<<this->roinameids.size();
+      //  qDebug()<<"Current Index"<<roiintindex<<this->roinameids.size();
 
         QString roiindex = QString::fromStdString(this->roinameids[roiintindex-1].id);
 
         soma2_msgs::SOMA2ROIObject obj =  rosthread.getSOMA2ROIwithID(roiindex.toInt());
 
-        qDebug()<<"ROI Index"<<roiindex;
+      //  qDebug()<<"ROI Index"<<roiindex;
 
 
         // QueryBuilder builder;
@@ -374,7 +387,7 @@ void MainWindow::on_queryButton_clicked()
         ui->timestepSlider->setValue(1);
     else
         emit ui->timestepSlider->valueChanged(1);
-  //  this->on_timestepSlider_valueChanged(1);
+    //  this->on_timestepSlider_valueChanged(1);
 
 
 
@@ -427,6 +440,12 @@ void MainWindow::on_resetqueryButton_clicked()
     ui->labelcontainsLEdit->setText("");
 
 
+
+    //Reset the bson obj
+    mongo::BSONObjBuilder mainbuilder;
+
+    this->mainBSONObj = mainbuilder.obj();
+
     emit ui->timestepSlider->valueChanged(1);
     ui->timestepSlider->setSliderPosition(1);
 
@@ -444,6 +463,34 @@ void MainWindow::on_exportjsonButton_clicked()
     QTextBrowser* browser = new QTextBrowser(dialog);
 
     browser->setGeometry(0,0,dialog->width(),dialog->height());
+
+    browser->setReadOnly(true);
+
+
+    /******* Add "new" before Date word for allowing Date queries to be executed directly in RoboMongo ***/
+
+    int index = lastqueryjson.indexOf("Date");
+
+    int lastindex = lastqueryjson.indexOf("Date",index+4);
+
+    qDebug()<<lastindex;
+
+    if(lastindex > 0)
+        lastindex  = lastindex+6;
+
+    if(index > 0 )
+    {
+       lastqueryjson = lastqueryjson.insert(index-1," new ");
+
+    }
+    if(lastindex > 0)
+    {
+         lastqueryjson = lastqueryjson.insert(lastindex-1," new ");
+    }
+
+  /**********************************************************************************************************/
+
+    browser->setText(lastqueryjson);
 
     dialog->show();
 

@@ -1,5 +1,6 @@
 #include "mongodbcxxinterface.h"
 #include <sstream>
+#include <iostream>
 MongoDBCXXInterface::MongoDBCXXInterface()
 {
 
@@ -51,13 +52,20 @@ int MongoDBCXXInterface::getMaxTimeStep()
     opts.limit(1);
 
 
+
     auto cursor = collection.find({},opts);
 
     QString timestepint ;
 
      for (auto&& doc : cursor) {
 
-    //    qDebug()<< QString::fromStdString(bsoncxx::to_json(doc));
+         auto val = doc["type"];
+
+         //std::cout<<bsoncxx::to_json(doc) << std::endl;<<std::endl;
+
+
+
+      //  qDebug()<< QString::fromStdString(bsoncxx::to_json(doc));
         QString result = QString::fromStdString(bsoncxx::to_json(doc));
         QStringList resultlines = result.split("\n");
         QStringList timestepline = resultlines.filter("timestep");

@@ -35,12 +35,34 @@ int main(int argc, char **argv){
 
     ros::init(argc, argv, "robot_state_viewer_node");
 
+    std::string objectsdb;
+    std::string roidb;
+
+    if(argc < 2)
+    {
+        std::cout << "Not enough input arguments!! Quitting..."<<std::endl;
+
+        return -1;
+
+    }
+    else
+    {
+        objectsdb = argv[1];
+        roidb = argv[2];
+
+    }
+
     qRegisterMetaType<std::vector<std::string> >();
-     qRegisterMetaType<std::vector<SOMA2ROINameID> >();
+    qRegisterMetaType<std::vector<SOMA2ROINameID> >();
 
     //RosThread thread();
 
     MainWindow mw;
+
+
+    mw.rosthread.setObjectsDBName(objectsdb);
+    mw.rosthread.setROIDBName(roidb);
+
 
     mw.show();
 

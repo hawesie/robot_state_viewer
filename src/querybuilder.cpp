@@ -1,6 +1,5 @@
 #include "querybuilder.h"
-#include <mongo/util/time_support.h>
-#include <mongo/bson/bsontypes.h>
+
 QueryBuilder::QueryBuilder()
 {
 
@@ -28,6 +27,8 @@ mongo::BSONObj QueryBuilder::buildSOMA2DateQuery(ulong lowerdate, ulong upperdat
     mongo::BSONObjBuilder builder;
 
     mongo::BSONObjBuilder builder2;
+
+   // std::cout<<mode<<std::endl;
 
     if(mode == 0)
     {
@@ -165,8 +166,6 @@ mongo::BSONObj QueryBuilder::buildSOMA2WeekdayQuery(int index)
 
 mongo::BSONObj QueryBuilder::buildSOMA2ROIWithinQuery(const soma2_msgs::SOMA2ROIObject &roiobj)
 {
-
-    QJsonArray arr;
 
     mongo::BSONArrayBuilder b;
 

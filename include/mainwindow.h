@@ -3,6 +3,8 @@
 
 #include <QtWidgets/QMainWindow>
 #include <QThread>
+#include <QFile>
+#include <QDir>
 #include "rosThread.h"
 #include "mongodbcxxinterface.h"
 #include "querybuilder.h"
@@ -17,6 +19,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+    RosThread rosthread;
     ~MainWindow();
 
 signals:
@@ -41,13 +44,16 @@ private slots:
 
     void on_exportjsonButton_clicked();
 
+
+
 private:
     Ui::MainWindow *ui;
-    RosThread rosthread;
+
     QThread* thread;
     int maxtimestep;
     std::vector<SOMA2ROINameID> roinameids;
     mongo::BSONObj mainBSONObj;
+    QString lastqueryjson;
 };
 
 #endif // MAINWINDOW_H

@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs sensor_msgs pcl_ros mongodb_store soma2_msgs nav_msgs
 )
 
-
+set(CMAKE_BUILD_TYPE Release)
 
 # Tell CMake to run moc when necessary:
 set(CMAKE_AUTOMOC ON)
