@@ -29,7 +29,7 @@ Getting started (general steps)
     ```
 
 SOMA2 map manager
-  ----------------
+-----------------
   1. Run the soma2 map manager for storing, reading and publishing 2D map:
   ```
   $ rosrun soma2_map_manager soma2_map.py
