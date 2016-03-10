@@ -93,14 +93,16 @@ void RosThread::loop()
 
     //worldstate =  getSOMA2ObjectsWithTimestep(0);
 
-  //  pcp.publish(worldstate);
+    //  pcp.publish(worldstate);
 
-   this->fetchSOMA2ROINames();
-   this->fetchSOMA2ObjectLabels();
+    if(this->roibdname.size() > 0)
+        this->fetchSOMA2ROINames();
 
-   emit mapinfoReceived();
+    this->fetchSOMA2ObjectLabels();
 
-  // emit SOMA2ObjectLabels(res);
+    emit mapinfoReceived();
+
+    // emit SOMA2ObjectLabels(res);
 
     // getSOMA2Objects();
 
@@ -159,9 +161,9 @@ void RosThread::fetchSOMA2ObjectLabels()
     if(!labelsdir.exists(dir))
         labelsdir.mkdir(dir);
 
-   QString filename = "objectlabels.txt";
+    QString filename = "objectlabels.txt";
 
-   dir.append(filename);
+    dir.append(filename);
 
     QFile file(dir);
 
@@ -192,7 +194,7 @@ void RosThread::fetchSOMA2ObjectLabels()
 
 
 
-         //   spr = soma2objects[i];
+            //   spr = soma2objects[i];
 
             str.append(QString::fromStdString(soma2objects[i]->type));
 
@@ -208,7 +210,7 @@ void RosThread::fetchSOMA2ObjectLabels()
         }
     }
 
-  //  soma2objects.clear();
+    //  soma2objects.clear();
 
 
     // Remove duplicate names
@@ -217,41 +219,41 @@ void RosThread::fetchSOMA2ObjectLabels()
     // Sort the labels
     ls.sort(Qt::CaseInsensitive);
 
-   // std::vector<std::string> res(ls.size());
+    // std::vector<std::string> res(ls.size());
 
 
     // Dirty workaround for destorying the shared pointer of objects and reduce memory usage:
     // Dump the data to an string array first
-   // std::string res[ls.size()];
+    // std::string res[ls.size()];
 
-   // std::vector<std::string> soma2labels;
+    // std::vector<std::string> soma2labels;
 
 
 
     QTextStream stream(&file);
 
-     foreach(QString st, ls)
+    foreach(QString st, ls)
     {
-          stream<<st<<"\n";
+        stream<<st<<"\n";
 
-          // Dump data to array
-       // res[count].append(st.toStdString());
+        // Dump data to array
+        // res[count].append(st.toStdString());
 
         // Then transfer it into vector
-      //  soma2labels.push_back(res[count]);
+        //  soma2labels.push_back(res[count]);
 
-       // this->labelnames.push_back(res[count]);
+        // this->labelnames.push_back(res[count]);
 
-      //  count++;
-       // qDebug()<<st;
+        //  count++;
+        // qDebug()<<st;
     }
 
 
-     file.close();
+    file.close();
 
 
 
-   /* std::sort(res.begin(), res.end());
+    /* std::sort(res.begin(), res.end());
 
     auto last = std::unique(res.begin(), res.end());
 
@@ -267,55 +269,55 @@ void RosThread::fetchSOMA2ObjectLabels()
 }
 void RosThread::fetchSOMA2ROINames()
 {
-  // std::vector<SOMA2ROINameID> res;
+    // std::vector<SOMA2ROINameID> res;
 
     ros::NodeHandle nl;
 
-   mongodb_store::MessageStoreProxy soma2store(nl,"soma2_roi",this->roibdname);
+    mongodb_store::MessageStoreProxy soma2store(nl,"soma2_roi",this->roibdname);
 
-   mongo::BSONObjBuilder builder;
-
-
-   QJsonObject jsonobj;
-
-   jsonobj.insert("map_name",QString::fromStdString(this->map_name));
-
-   QJsonDocument doc;
-
-   doc.setObject(jsonobj);
-
-   QString str(doc.toJson());
-
-  // qDebug()<<str;
-
-   builder.appendElements(mongo::fromjson(str.toStdString()));
+    mongo::BSONObjBuilder builder;
 
 
-   std::vector<boost::shared_ptr<soma2_msgs::SOMA2ROIObject> > rois;
+    QJsonObject jsonobj;
+
+    jsonobj.insert("map_name",QString::fromStdString(this->map_name));
+
+    QJsonDocument doc;
+
+    doc.setObject(jsonobj);
+
+    QString str(doc.toJson());
+
+    // qDebug()<<str;
+
+    builder.appendElements(mongo::fromjson(str.toStdString()));
 
 
-   soma2store.query(rois,builder.obj());
+    std::vector<boost::shared_ptr<soma2_msgs::SOMA2ROIObject> > rois;
 
-   if(rois.size() > 0)
-   {
-       for(auto &roi:rois)
-       {
-          // res.push_back(roi->type.data());
-           SOMA2ROINameID roinameid;
-           roinameid.id = roi->id.data();
-           roinameid.name = roi->type.data();
-           this->roinameids.push_back(roinameid);
-           this->roiarray.push_back(*roi);
-       }
-   }
 
-   nl.shutdown();
+    soma2store.query(rois,builder.obj());
 
-  // rois.clear();
+    if(rois.size() > 0)
+    {
+        for(auto &roi:rois)
+        {
+            // res.push_back(roi->type.data());
+            SOMA2ROINameID roinameid;
+            roinameid.id = roi->id.data();
+            roinameid.name = roi->type.data();
+            this->roinameids.push_back(roinameid);
+            this->roiarray.push_back(*roi);
+        }
+    }
 
-   emit SOMA2ROINames(this->roinameids);
+    nl.shutdown();
 
-   //  return this->roinameids;
+    // rois.clear();
+
+    emit SOMA2ROINames(this->roinameids);
+
+    //  return this->roinameids;
 
 
 
@@ -453,10 +455,10 @@ std::string RosThread::getSOMA2ObjectDateWithTimestep(int timestep)
 
     QString str(doc.toJson());
 
-  //  qDebug()<<str;
+    //  qDebug()<<str;
 
     std::stringstream ss;
-  //  ss<<"{\"timestep\":\""<<timestep<<"\,\"map_name\":\""<<this->map_name<<"\"}";
+    //  ss<<"{\"timestep\":\""<<timestep<<"\,\"map_name\":\""<<this->map_name<<"\"}";
 
     builder2.appendElements(mongo::fromjson(str.toStdString()));
 
@@ -488,7 +490,7 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2ObjectsWithDate(const 
 {
 
     ros::NodeHandle nl;
-     mongodb_store::MessageStoreProxy soma2store(nl,"soma2",this->objectsdbname);
+    mongodb_store::MessageStoreProxy soma2store(nl,"soma2",this->objectsdbname);
 
     std::vector<soma2_msgs::SOMA2Object> res;
 
@@ -503,7 +505,7 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2ObjectsWithDate(const 
 
 
 
-   // qDebug()<<"I am here";
+    // qDebug()<<"I am here";
 
     mongo::BSONObj builderobj = builder.obj();
 
@@ -511,7 +513,7 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2ObjectsWithDate(const 
 
     nl.shutdown();
 
-    qDebug()<<QString::fromStdString(builderobj.jsonString());
+  //  qDebug()<<QString::fromStdString(builderobj.jsonString());
 
 
     if(soma2objects.size() > 0)
@@ -523,27 +525,27 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2ObjectsWithDate(const 
 
     }
 
-   // soma2objects.clear();
+    // soma2objects.clear();
     qDebug()<<"Query returned"<<res.size()<<"objects";
 
-   // std::cout<<QUERY("\"geoloc\""<<stdstr).obj.toString()<<std::endl;
+    // std::cout<<QUERY("\"geoloc\""<<stdstr).obj.toString()<<std::endl;
 
-  //  std::cout<< BSON("geoloc"<<stdstr).jsonString();
+    //  std::cout<< BSON("geoloc"<<stdstr).jsonString();
 
     return res;
 
 }
 std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(mongo::BSONObj &queryobj, int timestep)
- //std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > RosThread::querySOMA2Objects(const mongo::BSONObj &queryobj, int timestep)
+//std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > RosThread::querySOMA2Objects(const mongo::BSONObj &queryobj, int timestep)
 {
 
-     ros::NodeHandle nl;
+    ros::NodeHandle nl;
 
     mongodb_store::MessageStoreProxy soma2store(nl,"soma2",this->objectsdbname);
 
 
     std::vector<soma2_msgs::SOMA2Object> res;
-  //  std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > res;
+    //  std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > res;
 
 
     mongo::BSONObjBuilder builder;
@@ -559,32 +561,32 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(mongo::BSONObj
 
     //soma2objects.clear();
 
-   std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > soma2objects;
+    std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > soma2objects;
 
 
 
-   /* queryjson = queryjson.remove(queryjson.indexOf("\""),1);
+    /* queryjson = queryjson.remove(queryjson.indexOf("\""),1);
     queryjson = queryjson.remove(queryjson.lastIndexOf("\""),1);*/
 
- //   qDebug()<<queryjson.toLatin1().data();
+    //   qDebug()<<queryjson.toLatin1().data();
 
-  //   std::string stdstr(queryjson.toLatin1().data());
+    //   std::string stdstr(queryjson.toLatin1().data());
 
-  //  stdstr.erase(stdstr.begin(),stdstr.begin()+1);
-   // stdstr.erase(stdstr.end()-1,stdstr.end());
+    //  stdstr.erase(stdstr.begin(),stdstr.begin()+1);
+    // stdstr.erase(stdstr.end()-1,stdstr.end());
 
-   // soma2messagestore.query(labelled_objects,QUERY("\"geoloc\""<<stdstr).obj);
+    // soma2messagestore.query(labelled_objects,QUERY("\"geoloc\""<<stdstr).obj);
 
 
     queryobj = builder.obj();
 
     soma2store.query(soma2objects,queryobj);
 
-   // soma2store.~MessageStoreProxy();
+    // soma2store.~MessageStoreProxy();
 
     nl.shutdown();
 
-  //  qDebug()<<QString::fromStdString(queryobj.jsonString());
+    //  qDebug()<<QString::fromStdString(queryobj.jsonString());
 
 
     if(soma2objects.size() > 0)
@@ -602,9 +604,9 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(mongo::BSONObj
     qDebug()<<"Query returned"<<res.size()<<"objects";
 
 
-   // std::cout<<QUERY("\"geoloc\""<<stdstr).obj.toString()<<std::endl;
+    // std::cout<<QUERY("\"geoloc\""<<stdstr).obj.toString()<<std::endl;
 
-  //  std::cout<< BSON("geoloc"<<stdstr).jsonString();
+    //  std::cout<< BSON("geoloc"<<stdstr).jsonString();
 
     return res;
 

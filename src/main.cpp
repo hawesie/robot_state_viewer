@@ -48,7 +48,8 @@ int main(int argc, char **argv){
     else
     {
         objectsdb = argv[1];
-        roidb = argv[2];
+        if(argc > 2)
+            roidb = argv[2];
 
     }
 
