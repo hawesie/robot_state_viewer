@@ -1,7 +1,7 @@
 #include <QThread>
 #include <ros/ros.h>
 #include <QVector>
-#include <mongodb_store_modified/MongoFind.h>
+#include <mongodb_store/MongoFind.h>
 #include <mongodb_store/message_store.h>
 #include <mongo/bson/bson.h>
 #include <soma2_msgs/SOMA2Object.h>

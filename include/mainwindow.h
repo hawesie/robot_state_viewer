@@ -51,6 +51,7 @@ private:
 
     QThread* thread;
     int maxtimestep;
+    int mintimestep;
     std::vector<SOMA2ROINameID> roinameids;
     mongo::BSONObj mainBSONObj;
     QString lastqueryjson;

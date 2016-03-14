@@ -18,6 +18,7 @@ public:
     MongoDBCXXInterface();
     MongoDBCXXInterface(std::string hostaddress, std::string port, std::string database, std::string collectionname);
     int getMaxTimeStep();
+    int getMinTimeStep();
 private:
     std::string hostaddress;
     std::string port;

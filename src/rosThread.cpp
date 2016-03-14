@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QStringList>
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
@@ -148,7 +149,7 @@ void RosThread::shutdownROS()
 void RosThread::fetchSOMA2ObjectLabels()
 {
     ros::NodeHandle nl;
-    mongodb_store::MessageStoreProxy soma2store(nl,"soma2","labelled_objects");
+    mongodb_store::MessageStoreProxy soma2store(nl,"soma2",this->objectsdbname);
     std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> >  soma2objects;
     std::vector<std::string> soma2labels;
 
@@ -446,7 +447,7 @@ std::string RosThread::getSOMA2ObjectDateWithTimestep(int timestep)
 
     QJsonObject jsonobj;
 
-    jsonobj.insert("timestep",QString::number(timestep));
+    jsonobj.insert("timestep",timestep);
     jsonobj.insert("map_name",QString::fromStdString(this->map_name));
 
     QJsonDocument doc;
@@ -471,7 +472,10 @@ std::string RosThread::getSOMA2ObjectDateWithTimestep(int timestep)
     std::string date;
     if(soma2objects.size() > 0){
         anobject = *soma2objects[0];
-        date = anobject.logtime;
+        qint64 val = (float)anobject.logtimestamp*1000;
+        QDateTime dt = QDateTime::fromMSecsSinceEpoch(val,Qt::UTC);
+      //  qDebug()<<dt.toString(Qt::ISODate);
+        date = dt.toString(Qt::ISODate).toStdString();
     }
 
 
@@ -553,11 +557,8 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(mongo::BSONObj
 
     builder.appendElements(queryobj);
 
-    std::stringstream ss;
 
-    ss<<timestep;
-
-    builder.append("timestep",ss.str().data());
+    builder.append("timestep",timestep);
 
     //soma2objects.clear();
 
@@ -633,4 +634,3 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(mongo::BSONObj
 
     }
 }*/
-

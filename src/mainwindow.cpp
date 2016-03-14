@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&rosthread,SIGNAL(SOMA2ObjectLabels(std::vector<std::string>)),this,SLOT(handleSOMA2ObjectLabels(std::vector<std::string>)));
 
 
-    // connect(&rosthread,SIGNAL(rosFinished()),thread,SLOT(quit()));
+     connect(&rosthread,SIGNAL(rosFinished()),this,SLOT(close()));
 
     this->thread->start();
 
@@ -130,21 +130,26 @@ void MainWindow::handleMapInfoReceived()
 
     this->maxtimestep = mongointerface.getMaxTimeStep();
 
-    QString labeltext =  "1 / ";
+    this->mintimestep = mongointerface.getMinTimeStep();
+
+     QString labeltext ;
+    labeltext.append(QString::number(this->mintimestep+1));
+    labeltext.append(" / ");
+   // QString labeltext =  "1 / ";
 
     labeltext.append(QString::number(this->maxtimestep+1));
 
     ui->timesteplabel->setText(labeltext);
 
     ui->timestepSlider->setMaximum(maxtimestep+1);
-    ui->timestepSlider->setMinimum(1);
+    ui->timestepSlider->setMinimum(this->mintimestep+1);
     /**********************************************************************************/
 
 
 
 
     /****************************** Set Dates to Min/Max Values **********************/
-    std::string date = rosthread.getSOMA2ObjectDateWithTimestep(0);
+    std::string date = rosthread.getSOMA2ObjectDateWithTimestep(this->mintimestep);
 
     QDateTime qdate = QDateTime::fromString(QString::fromStdString(date),Qt::ISODate);
 
