@@ -1,6 +1,7 @@
 #include "mongodbcxxinterface.h"
 #include <sstream>
 #include <iostream>
+#include <mongocxx/exception/query_exception.hpp>
 MongoDBCXXInterface::MongoDBCXXInterface()
 {
 
@@ -19,7 +20,7 @@ MongoDBCXXInterface::MongoDBCXXInterface(std::string hostaddress, std::string po
     mongocxx::client conn(uri);
 
 
-  /*  auto collection = conn[database][collectionname];*/
+    /*  auto collection = conn[database][collectionname];*/
 
     this->collectionname = collectionname;
     this->database = database;
@@ -41,47 +42,66 @@ int MongoDBCXXInterface::getMaxTimeStep()
     auto collection = conn[this->database][this->collectionname];
 
 
-    mongocxx::options::find opts;
+    if(collection){
 
-    bsoncxx::builder::stream::document order_builder;
+        mongocxx::options::find opts;
 
-    order_builder << "_id" << -1;
+        bsoncxx::builder::stream::document order_builder;
 
-    opts.sort(order_builder.view());
+        order_builder << "_id" << -1;
 
-    opts.limit(1);
+        opts.sort(order_builder.view());
 
+        opts.limit(1);
 
+        try{
 
-    auto cursor = collection.find({},opts);
-
-    QString timestepint ;
-
-     for (auto&& doc : cursor) {
-
-         auto val = doc["type"];
-
-         //std::cout<<bsoncxx::to_json(doc) << std::endl;<<std::endl;
+            auto cursor = collection.find({},opts);
 
 
+            QString timestepint ;
 
-      //  qDebug()<< QString::fromStdString(bsoncxx::to_json(doc));
-        QString result = QString::fromStdString(bsoncxx::to_json(doc));
-        QStringList resultlines = result.split("\n");
-        QStringList timestepline = resultlines.filter("timestep");
-        timestepint = timestepline[0].section(":",1,1);
+            for (auto&& doc : cursor) {
 
-        qDebug()<<"Max timestep for the collection named"<<QString::fromStdString(this->collectionname)<<timestepint.remove(QRegExp("[\",]")).toInt();
+                auto val = doc["type"];
+
+                //std::cout<<bsoncxx::to_json(doc) << std::endl;<<std::endl;
 
 
-       //  QJsonParseError err;
-       // QJsonDocument d = QJsonDocument::fromJson(QString::fromStdString(bsoncxx::to_json(doc)).toUtf8(),&err);
-       // qWarning() << d.isNull();
-       // qDebug()<<err.errorString();
-       }
 
-     return timestepint.remove(QRegExp("[\",]")).toInt();
+                //  qDebug()<< QString::fromStdString(bsoncxx::to_json(doc));
+                QString result = QString::fromStdString(bsoncxx::to_json(doc));
+                QStringList resultlines = result.split("\n");
+                QStringList timestepline = resultlines.filter("timestep");
+                timestepint = timestepline[0].section(":",1,1);
 
+                qDebug()<<"Max timestep for the collection named"<<QString::fromStdString(this->collectionname)<<timestepint.remove(QRegExp("[\",]")).toInt();
+
+
+                //  QJsonParseError err;
+                // QJsonDocument d = QJsonDocument::fromJson(QString::fromStdString(bsoncxx::to_json(doc)).toUtf8(),&err);
+                // qWarning() << d.isNull();
+                // qDebug()<<err.errorString();
+            }
+
+            return timestepint.remove(QRegExp("[\",]")).toInt();
+
+        }
+        catch(mongocxx::v_noabi::query_exception e)
+        {
+            std::cout<<"Exception occured while querying db with host address "<<this->hostaddress<<" port "<<this->port<<"\n";
+            return -1;
+
+        }
+
+
+    }
+    else
+    {
+        std::cout<<"Cannot connect to DB "<<this->hostaddress<<" "<<this->port<<"\n";
+        return -1;
+
+    }
 
 }
 int MongoDBCXXInterface::getMinTimeStep()
@@ -97,47 +117,61 @@ int MongoDBCXXInterface::getMinTimeStep()
 
     auto collection = conn[this->database][this->collectionname];
 
+    if(collection){
 
-    mongocxx::options::find opts;
+        mongocxx::options::find opts;
 
-    bsoncxx::builder::stream::document order_builder;
+        bsoncxx::builder::stream::document order_builder;
 
-  //  order_builder << "_id" << -1;
+        //  order_builder << "_id" << -1;
 
-  //  opts.sort(order_builder.view());
+        //  opts.sort(order_builder.view());
 
-    opts.limit(1);
-
-
-
-    auto cursor = collection.find({},opts);
-
-    QString timestepint ;
-
-     for (auto&& doc : cursor) {
-
-         auto val = doc["type"];
-
-         //std::cout<<bsoncxx::to_json(doc) << std::endl;<<std::endl;
+        opts.limit(1);
 
 
+        try{
+            auto cursor = collection.find({},opts);
 
-      //  qDebug()<< QString::fromStdString(bsoncxx::to_json(doc));
-        QString result = QString::fromStdString(bsoncxx::to_json(doc));
-        QStringList resultlines = result.split("\n");
-        QStringList timestepline = resultlines.filter("timestep");
-        timestepint = timestepline[0].section(":",1,1);
+            QString timestepint ;
 
-        qDebug()<<"Min timestep for the collection named"<<QString::fromStdString(this->collectionname)<<timestepint.remove(QRegExp("[\",]")).toInt();
+            for (auto&& doc : cursor) {
 
+                auto val = doc["type"];
 
-       //  QJsonParseError err;
-       // QJsonDocument d = QJsonDocument::fromJson(QString::fromStdString(bsoncxx::to_json(doc)).toUtf8(),&err);
-       // qWarning() << d.isNull();
-       // qDebug()<<err.errorString();
-       }
-
-     return timestepint.remove(QRegExp("[\",]")).toInt();
+                //std::cout<<bsoncxx::to_json(doc) << std::endl;<<std::endl;
 
 
+
+                //  qDebug()<< QString::fromStdString(bsoncxx::to_json(doc));
+                QString result = QString::fromStdString(bsoncxx::to_json(doc));
+                QStringList resultlines = result.split("\n");
+                QStringList timestepline = resultlines.filter("timestep");
+                timestepint = timestepline[0].section(":",1,1);
+
+                qDebug()<<"Min timestep for the collection named"<<QString::fromStdString(this->collectionname)<<timestepint.remove(QRegExp("[\",]")).toInt();
+
+
+                //  QJsonParseError err;
+                // QJsonDocument d = QJsonDocument::fromJson(QString::fromStdString(bsoncxx::to_json(doc)).toUtf8(),&err);
+                // qWarning() << d.isNull();
+                // qDebug()<<err.errorString();
+            }
+
+            return timestepint.remove(QRegExp("[\",]")).toInt();
+        }
+        catch(mongocxx::v_noabi::query_exception e)
+        {
+            std::cout<<"Exception occured while querying db with host address "<<this->hostaddress<<" port "<<this->port<<"\n";
+            return -1;
+
+        }
+
+    }
+    else
+    {
+        std::cout<<"Cannot connect to DB "<<this->hostaddress<<" "<<this->port<<"\n";
+        return -1;
+
+    }
 }

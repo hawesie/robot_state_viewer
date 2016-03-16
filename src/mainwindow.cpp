@@ -13,6 +13,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mapnamelabel->setText("DB Fetch is in progress...");
 
+    this->mongodbhost = "localhost";
+    this->mongodbport = "62345";
+
     ui->tab->setEnabled(false);
 
     thread = new QThread(this);
@@ -28,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&rosthread,SIGNAL(SOMA2ObjectLabels(std::vector<std::string>)),this,SLOT(handleSOMA2ObjectLabels(std::vector<std::string>)));
 
 
-     connect(&rosthread,SIGNAL(rosFinished()),this,SLOT(close()));
+    connect(&rosthread,SIGNAL(rosFinished()),this,SLOT(close()));
 
     this->thread->start();
 
@@ -46,6 +49,16 @@ MainWindow::~MainWindow()
     thread->quit();
     thread->wait();
     delete ui;
+}
+
+void MainWindow::setMongoDBHostName(std::string hostname)
+{
+    this->mongodbhost = hostname;
+
+}
+void MainWindow::setMongoDBPort(std::string port)
+{
+    this->mongodbport = port;
 }
 
 void MainWindow::on_timestepSlider_valueChanged(int value)
@@ -126,7 +139,7 @@ void MainWindow::handleMapInfoReceived()
     /***********************Set Timestep Interval *************************************/
     std::string objectsdbname = this->rosthread.getObjectsDBName();
 
-    MongoDBCXXInterface mongointerface("localhost","62345",objectsdbname,"soma2");
+    MongoDBCXXInterface mongointerface(this->mongodbhost,this->mongodbport,objectsdbname,"soma2");
 
     this->maxtimestep = mongointerface.getMaxTimeStep();
 

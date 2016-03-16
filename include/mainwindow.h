@@ -22,6 +22,9 @@ public:
     RosThread rosthread;
     ~MainWindow();
 
+    void setMongoDBHostName(std::string hostname);
+    void setMongoDBPort(std::string port);
+
 signals:
     void sliderValue(int val);
 public slots:
@@ -55,6 +58,8 @@ private:
     std::vector<SOMA2ROINameID> roinameids;
     mongo::BSONObj mainBSONObj;
     QString lastqueryjson;
+    std::string mongodbhost;
+    std::string mongodbport;
 };
 
 #endif // MAINWINDOW_H

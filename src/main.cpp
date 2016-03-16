@@ -36,7 +36,11 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "robot_state_viewer_node");
 
     std::string objectsdb;
+    std::string mongodbhost;
+    std::string mongodbport;
     std::string roidb;
+
+     MainWindow mw;
 
     if(argc < 2)
     {
@@ -48,8 +52,16 @@ int main(int argc, char **argv){
     else
     {
         objectsdb = argv[1];
-        if(argc > 2)
-            roidb = argv[2];
+        if(argc >2){
+         mongodbhost = argv[2];
+         mw.setMongoDBHostName(mongodbhost);
+        }
+        if(argc >3){
+         mongodbport = argv[3];
+         mw.setMongoDBPort(mongodbport);
+        }
+        if(argc >4)
+         roidb = argv[4];
 
     }
 
@@ -58,7 +70,7 @@ int main(int argc, char **argv){
 
     //RosThread thread();
 
-    MainWindow mw;
+
 
 
     mw.rosthread.setObjectsDBName(objectsdb);
