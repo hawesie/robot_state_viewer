@@ -34,7 +34,9 @@ private slots:
     void on_timestepSlider_valueChanged(int value);
 
     void on_roiComboBox_currentIndexChanged(const QString &arg1);
+
     void  handleSOMA2ObjectLabels(std::vector<std::string>);
+
     void  handleSOMA2ROINames(std::vector<SOMA2ROINameID>);
 
     void on_queryButton_clicked();

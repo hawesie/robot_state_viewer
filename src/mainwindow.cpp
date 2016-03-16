@@ -137,9 +137,11 @@ void MainWindow::handleMapInfoReceived()
 
 
     /***********************Set Timestep Interval *************************************/
-    std::string objectsdbname = this->rosthread.getObjectsDBName();
+    std::string objectsdbname = this->rosthread.getSOMA2ObjectsDBName();
 
-    MongoDBCXXInterface mongointerface(this->mongodbhost,this->mongodbport,objectsdbname,"soma2");
+    std::string objectscolname = this->rosthread.getSOMA2ObjectsCollectionName();
+
+    MongoDBCXXInterface mongointerface(this->mongodbhost,this->mongodbport,objectsdbname,objectscolname);
 
     this->maxtimestep = mongointerface.getMaxTimeStep();
 

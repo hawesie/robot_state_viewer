@@ -64,11 +64,20 @@ public:
      // Query the SOMA2 objects using timeinterval
      std::vector<soma2_msgs::SOMA2Object> querySOMA2ObjectsWithDate(const mongo::BSONObj& queryobj);
 
-     void setObjectsDBName(std::string name);
+     // Set the DB name for SOMA2 objects
+     void setSOMA2ObjectsDBName(std::string name);
 
-     void setROIDBName(std::string name);
+     // Set the collection name for SOMA2 objects
+     void setSOMA2ObjectsCollectionName(std::string name);
 
-     std::string getObjectsDBName();
+     void setSOMA2ROIDBName(std::string name);
+
+     // Get the DB name for SOMA2 objects
+     std::string getSOMA2ObjectsDBName();
+
+     // Get the collection name for SOMA2 objects
+     std::string getSOMA2ObjectsCollectionName();
+
 
      std::string getROIDBName();
 
@@ -81,6 +90,7 @@ private:
      ros::ServiceClient roiclient;
 
      std::string objectsdbname;
+     std::string objectscollectionname;
      std::string roibdname;
     // mongodb_store_modified::MongoFindRequest req;
    //  mongodb_store::MessageStoreProxy soma2messagestore;
