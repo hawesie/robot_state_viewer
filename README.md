@@ -8,8 +8,9 @@ Using the visual interface, advanced queries with spatio-temporal constraints  c
 Prerequisites
 -------------
 
-- MongoDB (>=2.6)
+- MongoDB (>=3.2)
 - mongodb_store - use this [fork](https://github.com/hkaraoguz/mongodb_store)
+- soma2 [link](https://github.com/hkaraoguz/soma2)
 - MongoCXX Driver [link](https://github.com/mongodb/mongo-cxx-driver)
 - Qt5
 
@@ -30,7 +31,7 @@ Getting started (general steps)
 
 SOMA2 map manager
 -----------------
-  1. Run the soma2 map manager for storing, reading and publishing 2D map:
+  1. Run the soma2 map manager for storing, reading and publishing 2D map. Running this node is essential for running the robot_state_viewer_node:
   ```
   $ rosrun soma2_map_manager soma2_map.py
   ```
@@ -40,7 +41,7 @@ SOMA2 map manager
     ```
   where `map.yaml` specifies the map you want to load. After running the `map_server`, you should save the published map using the `soma2 map manager`.
 
-  2. Start RVIZ, add a Map display type and subscribe to the `soma2/map` topic:
+  2. If you want to check the published map, start RVIZ, add a Map display type and subscribe to the `soma2/map` topic:
 
     ```
     $ rosrun rviz rviz
@@ -63,10 +64,10 @@ robot_state_viewer
 1. Run the robot state viewer:
 
 ```
-$ rosrun robot_state_viewer robot_state_viewer_node <objects db name> <roi db name>
+$ rosrun robot_state_viewer robot_state_viewer_node <objects db name> <objects collection name> <mongodb hostname> <mongodb port> <roi db name>
 ```
-The parameter `<roi db name>` is optional while `<objects db name>` is required.
 
-2. If not running, run RVIZ to display the results of the queries. You can go back and forth between robot states using the slider. You can also execute advanced queries by setting dates, times, etc, enabling them using the checkboxes and by pressing the `Query` button. When you make changes in query constrains, make sure to press `Query` button for updating the query. You can also export the executed query in JSON format using the `Export JSON` button. You can reset the query by pressing `Reset` button.
+
+2. If not running, start RVIZ to display the results of the queries. You can go back and forth between robot states using the slider. You can also execute advanced queries by setting dates, times, etc, enabling them using the checkboxes and by pressing the `Query` button. When you make changes in query constrains, make sure to press `Query` button for updating the query. You can also export the executed query in JSON format using the `Export JSON` button. You can reset the query by pressing `Reset` button. For any arbitrary query, if more than 30 objects are fetched, only first 30 of them are displayed as point clouds because of performance issues.
 
 ![marker](https://raw.githubusercontent.com/hkaraoguz/robot_state_viewer/master/doc/robot_state_viewer.png)
