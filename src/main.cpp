@@ -11,8 +11,8 @@ int main(int argc, char **argv){
 
     std::string objectsdbname;
     std::string objectscollectionname;
-    std::string mongodbhost;
-    std::string mongodbport;
+    //std::string mongodbhost;
+    //std::string mongodbport;
     std::string roidb;
 
     MainWindow mw;
@@ -39,17 +39,17 @@ int main(int argc, char **argv){
             objectscollectionname = argv[2];
             mw.rosthread.setSOMA2ObjectsCollectionName(objectscollectionname);
         }
-        if(argc >3){
+      /*  if(argc >3){
             mongodbhost = argv[3];
             mw.setMongoDBHostName(mongodbhost);
         }
         if(argc >4){
             mongodbport = argv[4];
             mw.setMongoDBPort(mongodbport);
-        }
+        }*/
 
-        if(argc >5){
-            roidb = argv[5];
+        if(argc >3){
+            roidb = argv[3];
             mw.rosthread.setSOMA2ROIDBName(roidb);
         }
 

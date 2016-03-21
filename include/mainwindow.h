@@ -6,7 +6,7 @@
 #include <QFile>
 #include <QDir>
 #include "rosThread.h"
-#include "mongodbcxxinterface.h"
+//#include "mongodbcxxinterface.h"
 #include "querybuilder.h"
 
 namespace Ui {
@@ -60,8 +60,8 @@ private:
     std::vector<SOMA2ROINameID> roinameids;
     mongo::BSONObj mainBSONObj;
     QString lastqueryjson;
-    std::string mongodbhost;
-    std::string mongodbport;
+   // std::string mongodbhost;
+   // std::string mongodbport;
 };
 
 #endif // MAINWINDOW_H

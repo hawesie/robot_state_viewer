@@ -11,7 +11,6 @@ Prerequisites
 - MongoDB (>=3.2)
 - mongodb_store - use this [fork](https://github.com/hkaraoguz/mongodb_store)
 - soma2 [link](https://github.com/hkaraoguz/soma2)
-- MongoCXX Driver [link](https://github.com/mongodb/mongo-cxx-driver)
 - Qt5
 
 
@@ -64,7 +63,7 @@ robot_state_viewer
 1. Run the robot state viewer:
 
 ```
-$ rosrun robot_state_viewer robot_state_viewer_node <objects db name> <objects collection name> <mongodb hostname> <mongodb port> <roi db name>
+$ rosrun robot_state_viewer robot_state_viewer_node <objects db name> <objects collection name> <roi db name>
 ```
 
 

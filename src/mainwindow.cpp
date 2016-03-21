@@ -13,8 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mapnamelabel->setText("DB Fetch is in progress...");
 
-    this->mongodbhost = "localhost";
-    this->mongodbport = "62345";
+   // this->mongodbhost = "localhost";
+   // this->mongodbport = "62345";
 
     ui->tab->setEnabled(false);
 
@@ -51,7 +51,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::setMongoDBHostName(std::string hostname)
+/*void MainWindow::setMongoDBHostName(std::string hostname)
 {
     this->mongodbhost = hostname;
 
@@ -59,7 +59,7 @@ void MainWindow::setMongoDBHostName(std::string hostname)
 void MainWindow::setMongoDBPort(std::string port)
 {
     this->mongodbport = port;
-}
+}*/
 
 void MainWindow::on_timestepSlider_valueChanged(int value)
 {
@@ -141,11 +141,14 @@ void MainWindow::handleMapInfoReceived()
 
     std::string objectscolname = this->rosthread.getSOMA2ObjectsCollectionName();
 
-    MongoDBCXXInterface mongointerface(this->mongodbhost,this->mongodbport,objectsdbname,objectscolname);
+   // MongoDBCXXInterface mongointerface(this->mongodbhost,this->mongodbport,objectsdbname,objectscolname);
 
-    this->maxtimestep = mongointerface.getMaxTimeStep();
+    std::vector<int> minmax = this->rosthread.getSOMA2CollectionMinMaxTimestep();
 
-    this->mintimestep = mongointerface.getMinTimeStep();
+    this->mintimestep = minmax[0];
+    this->maxtimestep = minmax[1];
+
+
 
      QString labeltext ;
     labeltext.append(QString::number(this->mintimestep+1));

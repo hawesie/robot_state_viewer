@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.4)
 project(robot_state_viewer)
 
 ## Find catkin macros and libraries
@@ -27,8 +27,8 @@ find_package(Qt5Declarative)
 find_package(PkgConfig)
 INCLUDE(FindPkgConfig)
 
-pkg_check_modules(LIBMONGOCXX REQUIRED libmongocxx)
-pkg_check_modules(LIBBSONCXX REQUIRED libbsoncxx)
+#pkg_check_modules(LIBMONGOCXX REQUIRED libmongocxx)
+#pkg_check_modules(LIBBSONCXX REQUIRED libbsoncxx)
 
 #include_directories(${Qt5Widgets_INCLUDES})
 #add_definitions(${Qt5Widgets_DEFINITIONS})
@@ -176,10 +176,10 @@ add_custom_target(headers SOURCES ${LibFiles})
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(robot_state_viewer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-link_directories(${LIBMONGOCXX_LIBRARY_DIRS} ${LIBBSONCXX_LIBRARY_DIRS})
+#link_directories(${LIBMONGOCXX_LIBRARY_DIRS} ${LIBBSONCXX_LIBRARY_DIRS})
 
 ## Declare a C++ executable
-add_executable(robot_state_viewer_node src/main.cpp ${robot_state_viewer_SOURCES} ${qo_HEADERS_MOC} ${uis_h} include/mongodbcxxinterface.h include/querybuilder.h)
+add_executable(robot_state_viewer_node src/main.cpp ${robot_state_viewer_SOURCES} ${qo_HEADERS_MOC} ${uis_h} include/querybuilder.h)
 
 qt5_use_modules(robot_state_viewer_node Widgets Core)
 
@@ -189,7 +189,7 @@ qt5_use_modules(robot_state_viewer_node Widgets Core)
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(robot_state_viewer_node
-   ${catkin_LIBRARIES}  ${LIBMONGOCXX_LIBRARIES} ${LIBBSONCXX_LIBRARIES} -lqjson
+   ${catkin_LIBRARIES}
  )
 
 #############

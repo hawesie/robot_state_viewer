@@ -266,6 +266,41 @@ void RosThread::fetchSOMA2ObjectLabels()
     return ;
 
 }
+std::vector<int> RosThread::getSOMA2CollectionMinMaxTimestep()
+{
+    std::vector<int> res;
+    int min = -1;
+    int max = -1;
+
+    ros::NodeHandle nl;
+
+    mongodb_store::MessageStoreProxy soma2store(nl,this->objectscollectionname,this->objectsdbname);
+
+    mongo::BSONObjBuilder builder;
+
+    builder.append("$natural",-1);
+
+    std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > soma2objects;
+
+    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),builder.obj(),false,1);
+
+
+    if(soma2objects.size() > 0)
+        max = soma2objects[0]->timestep;
+        //std::cout<<soma2objects[0]->timestep<<std::endl;
+
+    soma2objects.clear();
+    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),mongo::BSONObj(),false,1);
+
+    if(soma2objects.size() > 0)
+        min = soma2objects[0]->timestep;
+
+    res.push_back(min);
+    res.push_back(max);
+
+    return res;
+
+}
 void RosThread::fetchSOMA2ROINames()
 {
     // std::vector<SOMA2ROINameID> res;

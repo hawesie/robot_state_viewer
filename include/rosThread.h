@@ -81,6 +81,8 @@ public:
 
      std::string getROIDBName();
 
+     std::vector<int> getSOMA2CollectionMinMaxTimestep();
+
     // std::vector<std::string> getSOMA2ObjectLabels();
 
 private:
