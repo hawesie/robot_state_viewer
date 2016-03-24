@@ -531,18 +531,18 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(mongo::BSONObj
     //  std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > res;
 
 
-    mongo::BSONObjBuilder builder;
+  //  mongo::BSONObjBuilder builder;
 
 
-    builder.appendElements(queryobj);
+  //  builder.appendElements(queryobj);
 
 
-    builder.append("timestep",timestep);
+   // builder.append("timestep",timestep);
 
 
     std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > soma2objects;
 
-    queryobj = builder.obj();
+  //  queryobj = builder.obj();
 
     soma2store.query(soma2objects,queryobj);
 

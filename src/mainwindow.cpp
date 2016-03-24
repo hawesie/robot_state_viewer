@@ -102,8 +102,16 @@ void MainWindow::on_timestepSlider_valueChanged(int value)
     }
 
 
+    mongo::BSONObjBuilder builder;
 
-    std::vector< soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(this->mainBSONObj,value-1);
+
+    builder.appendElements(this->mainBSONObj);
+
+    builder.append("timestep",value-1);
+
+    mongo::BSONObj tempObject = builder.obj();
+
+    std::vector< soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(tempObject,value-1);
 
     ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
 
@@ -112,11 +120,11 @@ void MainWindow::on_timestepSlider_valueChanged(int value)
     rosthread.publishSOMA2ObjectCloud(state);
 
 
-    lastqueryjson = QString::fromStdString(this->mainBSONObj.jsonString());
+    lastqueryjson = QString::fromStdString(tempObject.jsonString());
     //Reset the bson obj
-    mongo::BSONObjBuilder mainbuilder;
+   // mongo::BSONObjBuilder mainbuilder;
 
-    this->mainBSONObj = mainbuilder.obj();
+   // this->mainBSONObj = mainbuilder.obj();
 
 
 }
@@ -300,7 +308,7 @@ void MainWindow::on_queryButton_clicked()
 
     if(lowerdatecbox || upperdatecbox)
     {
-
+            ui->timestepSlider->setEnabled(false);
 
         QDateTime datetime;
         datetime.setDate(ui->lowerDateEdit->date());
@@ -334,10 +342,15 @@ void MainWindow::on_queryButton_clicked()
         mainbuilder.appendElements(bsonobj);
 
 
+    } else
+    {
+        ui->timestepSlider->setEnabled(true);
     }
 
     if(lowertime || uppertime)
     {
+
+
         int lowhour = ui->lowerTimeEdit->time().hour();
 
         int lowmin = ui->lowerTimeEdit->time().minute();
@@ -357,6 +370,7 @@ void MainWindow::on_queryButton_clicked()
         mainbuilder.appendElements(bsonobj);
 
     }
+
 
     if(weekdayindex > 0)
     {
@@ -406,10 +420,10 @@ void MainWindow::on_queryButton_clicked()
 
     this->mainBSONObj = mainbuilder.obj();
 
-    if(ui->timestepSlider->value() != 1)
-        ui->timestepSlider->setValue(1);
+    if(ui->timestepSlider->value() != mintimestep+1)
+        ui->timestepSlider->setValue(mintimestep+1);
     else
-        emit ui->timestepSlider->valueChanged(1);
+        emit ui->timestepSlider->valueChanged(mintimestep+1);
     //  this->on_timestepSlider_valueChanged(1);
 
 
@@ -469,8 +483,8 @@ void MainWindow::on_resetqueryButton_clicked()
 
     this->mainBSONObj = mainbuilder.obj();
 
-    emit ui->timestepSlider->valueChanged(1);
-    ui->timestepSlider->setSliderPosition(1);
+    emit ui->timestepSlider->valueChanged(mintimestep+1);
+    ui->timestepSlider->setSliderPosition(mintimestep+1);
 
 
 
