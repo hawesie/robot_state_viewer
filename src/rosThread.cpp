@@ -72,14 +72,14 @@ void RosThread::loop()
 
     qDebug()<<"Ros Thread is running!!";
 
-    ros::ServiceClient client = n.serviceClient<soma2_map_manager::MapInfo>("soma2/map_info");
+    ros::ServiceClient client = n.serviceClient<soma_map_manager::MapInfo>("soma2/map_info");
 
-    this->roiclient = n.serviceClient<soma2_roi_manager::DrawROI>("soma2/draw_roi");
+    this->roiclient = n.serviceClient<soma_roi_manager::DrawROI>("soma2/draw_roi");
 
-    soma2_map_manager::MapInfo srv;
+    soma_map_manager::MapInfo srv;
     srv.request.request = 0;
 
-    qDebug()<<"Waiting for map_info service from soma2_map_manager";
+    qDebug()<<"Waiting for map_info service from soma_map_manager";
 
     client.waitForExistence();
     if (client.call(srv))
@@ -135,7 +135,7 @@ void RosThread::loop()
 void RosThread::drawROIwithID(std::string id)
 {
 
-    soma2_roi_manager::DrawROI drawroi;
+    soma_roi_manager::DrawROI drawroi;
 
     drawroi.request.map_name = this->map_name;
     drawroi.request.roi_id = id;

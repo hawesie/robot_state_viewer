@@ -5,9 +5,9 @@
 #include <mongodb_store/message_store.h>
 #include <mongo/bson/bson.h>
 #include <soma2_msgs/SOMA2Object.h>
-#include <soma2_map_manager/MapInfo.h>
+#include <soma_map_manager/MapInfo.h>
 #include <soma2_msgs/SOMA2ROIObject.h>
-#include <soma2_roi_manager/DrawROI.h>
+#include <soma_roi_manager/DrawROI.h>
 #include <algorithm>    // std::unique, std::distance
 #include <vector>       // std::vector
 
