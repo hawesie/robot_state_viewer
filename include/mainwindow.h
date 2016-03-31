@@ -35,21 +35,24 @@ private slots:
 
     void on_roiComboBox_currentIndexChanged(const QString &arg1);
 
-    void  handleSOMA2ObjectLabels(std::vector<std::string>);
+    void  handleSOMA2ObjectTypes(std::vector<std::string> typenames);
 
     void  handleSOMA2ROINames(std::vector<SOMA2ROINameID>);
 
     void on_queryButton_clicked();
-
-    void on_labelequalsCBox_clicked(bool checked);
-
-    void on_labelcontainsCBox_clicked(bool checked);
 
     void on_resetqueryButton_clicked();
 
     void on_exportjsonButton_clicked();
 
 
+
+    void on_sliderCBox_clicked(bool checked);
+
+
+    void on_upperDateCBox_clicked(bool checked);
+
+    void on_lowerDateCBox_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;

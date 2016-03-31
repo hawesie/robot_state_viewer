@@ -12,7 +12,7 @@ public:
 
     static mongo::BSONObj buildSOMA2ROIWithinQuery(const soma2_msgs::SOMA2ROIObject& roiobj);
 
-    static mongo::BSONObj buildSOMA2LabelEqualsQuery(const std::string& labelname);
+    static mongo::BSONObj buildSOMA2TypeEqualsQuery(const std::vector<std::string>& typelist);
 
     static mongo::BSONObj buildSOMA2LabelContainsQuery(const std::string& text);
 
@@ -21,6 +21,10 @@ public:
     static mongo::BSONObj buildSOMA2DateQuery(ulong lowerdate, ulong upperdate, int mode);
 
     static mongo::BSONObj buildSOMA2TimeQuery(int lowerhour,int lowerminute, int upperhour, int upperminute,  int mode);
+
+    static mongo::BSONObj buildSOMA2TimestepQuery(int timestep);
+
+    static mongo::BSONObj buildSOMA2StringArrayBasedQuery(const std::vector<std::string>& list, std::string fieldname, std::string arrayOperator);
 
 private:
 };

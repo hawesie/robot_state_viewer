@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>634</width>
-    <height>466</height>
+    <width>619</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,26 +74,37 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QLabel" name="label">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Temporal Slider</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Temporal Slider</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="sliderCBox">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QSlider" name="timestepSlider">
@@ -233,66 +244,20 @@
            <widget class="QGroupBox" name="groupBox_2">
             <property name="minimumSize">
              <size>
-              <width>290</width>
-              <height>100</height>
+              <width>230</width>
+              <height>150</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="title">
-             <string>Object Labels</string>
+             <string>Object IDs</string>
             </property>
-            <widget class="QComboBox" name="labelsComboBox">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>20</y>
-               <width>151</width>
-               <height>27</height>
-              </rect>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>130</width>
-               <height>25</height>
-              </size>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_2">
-             <property name="geometry">
-              <rect>
-               <x>5</x>
-               <y>54</y>
-               <width>110</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Label Contains:</string>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="labelcontainsLEdit">
-             <property name="geometry">
-              <rect>
-               <x>117</x>
-               <y>51</y>
-               <width>100</width>
-               <height>27</height>
-              </rect>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="labelcontainsCBox">
-             <property name="geometry">
-              <rect>
-               <x>228</x>
-               <y>54</y>
-               <width>21</width>
-               <height>22</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="labelequalsCBox">
+            <widget class="QCheckBox" name="listViewIDCBox">
              <property name="geometry">
               <rect>
                <x>163</x>
@@ -305,32 +270,84 @@
               <string/>
              </property>
             </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox">
-            <property name="minimumSize">
-             <size>
-              <width>200</width>
-              <height>100</height>
-             </size>
-            </property>
-            <property name="title">
-             <string>Regions</string>
-            </property>
-            <widget class="QComboBox" name="roiComboBox">
+            <widget class="QListView" name="listViewObjectIDs">
              <property name="geometry">
               <rect>
                <x>0</x>
                <y>20</y>
-               <width>85</width>
-               <height>27</height>
+               <width>150</width>
+               <height>120</height>
+              </rect>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_6">
+            <property name="minimumSize">
+             <size>
+              <width>230</width>
+              <height>150</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="title">
+             <string>Object Types</string>
+            </property>
+            <widget class="QCheckBox" name="listViewObjectTypesCBox">
+             <property name="geometry">
+              <rect>
+               <x>163</x>
+               <y>24</y>
+               <width>21</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+            <widget class="QListView" name="listViewObjectTypes">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>20</y>
+               <width>150</width>
+               <height>120</height>
               </rect>
              </property>
             </widget>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>Region of Interests</string>
+          </property>
+          <widget class="QComboBox" name="roiComboBox">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>20</y>
+             <width>85</width>
+             <height>27</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -597,7 +614,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>634</width>
+     <width>619</width>
      <height>25</height>
     </rect>
    </property>

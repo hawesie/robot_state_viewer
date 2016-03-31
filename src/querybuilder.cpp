@@ -72,14 +72,63 @@ mongo::BSONObj QueryBuilder::buildSOMA2DateQuery(ulong lowerdate, ulong upperdat
     return builder2.obj();
 
 }
-mongo::BSONObj QueryBuilder::buildSOMA2LabelEqualsQuery(const std::string &labelname)
+
+mongo::BSONObj QueryBuilder::buildSOMA2TimestepQuery(int timestep)
 {
+    mongo::BSONObjBuilder builder;
+
+    builder.append("timestep",timestep);
+
+    return builder.obj();
+
+}
+
+/*mongo::BSONObj QueryBuilder::buildSOMA2TypeEqualsQuery(const std::vector<std::string>& typelist)
+{
+
+
+    mongo::BSONArrayBuilder arrbuilder;
+
+    for(int i = 0; i < typelist.size(); i++)
+    {
+        mongo::BSONObjBuilder builder;
+
+        builder.append("type",typelist[i].data());
+
+        arrbuilder.append(builder.obj());
+
+    }
 
     mongo::BSONObjBuilder builder;
 
-    builder.append("type",labelname.data());
+    builder.append("$or",arrbuilder.arr());
+
 
     return builder.obj();
+
+}*/
+mongo::BSONObj QueryBuilder::buildSOMA2StringArrayBasedQuery(const std::vector<std::string> &list, std::string fieldname, std::string arrayOperator)
+{
+
+    mongo::BSONArrayBuilder arrbuilder;
+
+    for(int i = 0; i < list.size(); i++)
+    {
+        mongo::BSONObjBuilder builder;
+
+        builder.append(fieldname,list[i].data());
+
+        arrbuilder.append(builder.obj());
+
+    }
+
+    mongo::BSONObjBuilder builder;
+
+    builder.append(arrayOperator,arrbuilder.arr());
+
+
+    return builder.obj();
+
 
 }
 mongo::BSONObj QueryBuilder::buildSOMA2TimeQuery(int lowerhour,int lowerminute, int upperhour, int upperminute,  int mode)
