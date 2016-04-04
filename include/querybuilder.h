@@ -24,7 +24,7 @@ public:
 
     static mongo::BSONObj buildSOMA2TimestepQuery(int timestep);
 
-    static mongo::BSONObj buildSOMA2StringArrayBasedQuery(const std::vector<std::string>& list, std::string fieldname, std::string arrayOperator);
+    static mongo::BSONObj buildSOMA2StringArrayBasedQuery(const std::vector<std::string>& list, std::vector<std::string> fieldnames, std::vector<int> objectIndexes, std::string arrayOperator);
 
 private:
 };

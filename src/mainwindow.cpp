@@ -71,11 +71,11 @@ void MainWindow::on_timestepSlider_valueChanged(int value)
         ui->datelabel->setText(QString::fromStdString(date));
 
 
-       // bool lowerdate = ui->lowerDateCBox->isChecked();
+        // bool lowerdate = ui->lowerDateCBox->isChecked();
 
-       // bool upperdate = ui->upperDateCBox->isChecked();
+        // bool upperdate = ui->upperDateCBox->isChecked();
 
-    /*    if(lowerdate || upperdate)
+        /*    if(lowerdate || upperdate)
         {
             std::vector<soma2_msgs::SOMA2Object> soma2objects =  rosthread.querySOMA2ObjectsWithDate(this->mainBSONObj);
 
@@ -373,7 +373,7 @@ void MainWindow::on_queryButton_clicked()
 
     if(lowerdatecbox || upperdatecbox)
     {
-       // ui->timestepSlider->setEnabled(false);
+        // ui->timestepSlider->setEnabled(false);
 
         QDateTime datetime;
         datetime.setDate(ui->lowerDateEdit->date());
@@ -439,46 +439,104 @@ void MainWindow::on_queryButton_clicked()
 
         mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2WeekdayQuery(weekdayindex-1);
 
+
         mainbuilder.appendElements(bsonobj);
     }
 
 
-    if(typeequals)
+    if(typeequals || idequals)
     {
-        QModelIndexList indexlist = ui->listViewObjectTypes->selectionModel()->selectedIndexes();
-
-        std::vector<std::string> list;
-
-        foreach(const QModelIndex& indx, indexlist)
+        if(typeequals && idequals)
         {
-            QString data = indx.data().toString();
+            QModelIndexList indexlist = ui->listViewObjectIDs->selectionModel()->selectedIndexes();
 
-            list.push_back(data.toStdString());
+            std::vector<std::string> list;
+
+            std::vector<std::string> fieldnames;
+            std::vector<int> objectIndexes;
+            fieldnames.push_back("id");
+            fieldnames.push_back("type");
+
+
+
+
+            foreach(const QModelIndex& indx, indexlist)
+            {
+                QString data = indx.data().toString();
+
+                list.push_back(data.toStdString());
+            }
+
+            objectIndexes.push_back(indexlist.size());
+
+
+            indexlist = ui->listViewObjectTypes->selectionModel()->selectedIndexes();
+
+
+            foreach(const QModelIndex& indx, indexlist)
+            {
+                QString data = indx.data().toString();
+
+                list.push_back(data.toStdString());
+            }
+
+
+            objectIndexes.push_back(indexlist.size());
+
+            mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(list,fieldnames,objectIndexes,"$or");
+
+             mainbuilder.appendElements(bsonobj);
+
+        }
+        else if(typeequals){
+            QModelIndexList indexlist = ui->listViewObjectTypes->selectionModel()->selectedIndexes();
+
+            std::vector<std::string> list;
+
+            foreach(const QModelIndex& indx, indexlist)
+            {
+                QString data = indx.data().toString();
+
+                list.push_back(data.toStdString());
+            }
+
+            // std::string typename = ui->labelsComboBox->currentText().toStdString();
+            std::vector<std::string> fieldnames;
+            fieldnames.push_back("type");
+            std::vector<int> objectIndexes;
+            objectIndexes.push_back(list.size());
+            mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(list,fieldnames,objectIndexes,"$or");
+
+            mainbuilder.appendElements(bsonobj);
+        }
+        else if(idequals)
+        {
+            QModelIndexList indexlist = ui->listViewObjectIDs->selectionModel()->selectedIndexes();
+
+            std::vector<std::string> list;
+
+            foreach(const QModelIndex& indx, indexlist)
+            {
+                QString data = indx.data().toString();
+
+                list.push_back(data.toStdString());
+            }
+
+            // std::string typename = ui->labelsComboBox->currentText().toStdString();
+
+            std::vector<std::string> fieldnames;
+            fieldnames.push_back("id");
+            std::vector<int> objectIndexes;
+            objectIndexes.push_back(list.size());
+            mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(list,fieldnames,objectIndexes,"$or");
+
+
+
+            mainbuilder.appendElements(bsonobj);
         }
 
-        // std::string typename = ui->labelsComboBox->currentText().toStdString();
-        mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(list,"type","$or");
-
-        mainbuilder.appendElements(bsonobj);
     }
-    if(idequals)
-    {
-        QModelIndexList indexlist = ui->listViewObjectIDs->selectionModel()->selectedIndexes();
 
-        std::vector<std::string> list;
-
-        foreach(const QModelIndex& indx, indexlist)
-        {
-            QString data = indx.data().toString();
-
-            list.push_back(data.toStdString());
-        }
-
-        // std::string typename = ui->labelsComboBox->currentText().toStdString();
-        mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(list,"id","$or");
-
-        mainbuilder.appendElements(bsonobj);
-    }
 
 
     if(roiintindex > 0){
@@ -505,9 +563,9 @@ void MainWindow::on_queryButton_clicked()
     if(slideractive)
     {
 
-          mongo::BSONObj timestepobj = QueryBuilder::buildSOMA2TimestepQuery(ui->timestepSlider->value()-1);
+        mongo::BSONObj timestepobj = QueryBuilder::buildSOMA2TimestepQuery(ui->timestepSlider->value()-1);
 
-          mainbuilder.appendElements(timestepobj);
+        mainbuilder.appendElements(timestepobj);
 
     }
 
@@ -566,6 +624,8 @@ void MainWindow::on_resetqueryButton_clicked()
     ui->upperDateCBox->setChecked(false);
 
     ui->listViewObjectTypes->clearSelection();
+
+    ui->listViewObjectIDs->clearSelection();
 
 
 
