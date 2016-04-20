@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QDialog>
 #include <QTextBrowser>
+#include <QStringListModel>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -13,8 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mapnamelabel->setText("DB Fetch is in progress...");
 
-   // this->mongodbhost = "localhost";
-   // this->mongodbport = "62345";
+    // this->mongodbhost = "localhost";
+    // this->mongodbport = "62345";
 
     ui->tab->setEnabled(false);
 
@@ -28,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&rosthread,SIGNAL(SOMA2ROINames(std::vector<SOMA2ROINameID>)),this,SLOT(handleSOMA2ROINames(std::vector<SOMA2ROINameID>)));
 
-    connect(&rosthread,SIGNAL(SOMA2ObjectLabels(std::vector<std::string>)),this,SLOT(handleSOMA2ObjectLabels(std::vector<std::string>)));
+    connect(&rosthread,SIGNAL(SOMA2ObjectTypes(std::vector<std::string>)),this,SLOT(handleSOMA2ObjectTypes(std::vector<std::string>)));
 
 
     connect(&rosthread,SIGNAL(rosFinished()),this,SLOT(close()));
@@ -51,39 +52,63 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-/*void MainWindow::setMongoDBHostName(std::string hostname)
-{
-    this->mongodbhost = hostname;
-
-}
-void MainWindow::setMongoDBPort(std::string port)
-{
-    this->mongodbport = port;
-}*/
 
 void MainWindow::on_timestepSlider_valueChanged(int value)
 {
     // emit sliderValue(value);
 
+    // If slider is Enabled
+    if(ui->sliderCBox->isChecked()){
 
-    QString labeltext =  QString::number(value);
+        QString labeltext =  QString::number(value);
 
-    labeltext.append(" / ").append(QString::number(maxtimestep+1));
+        labeltext.append(" / ").append(QString::number(maxtimestep+1));
 
-    ui->timesteplabel->setText(labeltext);
+        ui->timesteplabel->setText(labeltext);
 
-    std::string date = rosthread.getSOMA2ObjectDateWithTimestep(value-1);
+        std::string date = rosthread.getSOMA2ObjectDateWithTimestep(value-1);
 
-    ui->datelabel->setText(QString::fromStdString(date));
+        ui->datelabel->setText(QString::fromStdString(date));
 
 
-    bool lowerdate = ui->lowerDateCBox->isChecked();
+        // bool lowerdate = ui->lowerDateCBox->isChecked();
 
-    bool upperdate = ui->upperDateCBox->isChecked();
+        // bool upperdate = ui->upperDateCBox->isChecked();
 
-    if(lowerdate || upperdate)
-    {
-        std::vector<soma2_msgs::SOMA2Object> soma2objects =  rosthread.querySOMA2ObjectsWithDate(this->mainBSONObj);
+        /*    if(lowerdate || upperdate)
+        {
+            std::vector<soma2_msgs::SOMA2Object> soma2objects =  rosthread.querySOMA2ObjectsWithDate(this->mainBSONObj);
+
+            ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
+
+            sensor_msgs::PointCloud2 state =  rosthread.getSOMA2CombinedObjectCloud(soma2objects);
+
+            rosthread.publishSOMA2ObjectCloud(state);
+
+            lastqueryjson = QString::fromStdString(this->mainBSONObj.jsonString(mongo::TenGen,0 ));
+            //Reset the bson obj
+            mongo::BSONObjBuilder mainbuilder;
+
+            this->mainBSONObj = mainbuilder.obj();
+
+            return;
+
+        }*/
+
+
+        mongo::BSONObjBuilder builder;
+
+
+        builder.appendElements(this->mainBSONObj);
+
+        mongo::BSONObj timestepobj = QueryBuilder::buildSOMA2TimestepQuery(value-1);
+
+        builder.appendElements(timestepobj);
+        //builder.append("timestep",value-1);
+
+        mongo::BSONObj tempObject = builder.obj();
+
+        std::vector< soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(tempObject);
 
         ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
 
@@ -91,42 +116,14 @@ void MainWindow::on_timestepSlider_valueChanged(int value)
 
         rosthread.publishSOMA2ObjectCloud(state);
 
-        lastqueryjson = QString::fromStdString(this->mainBSONObj.jsonString(mongo::TenGen,0 ));
+
+        lastqueryjson = QString::fromStdString(tempObject.jsonString());
         //Reset the bson obj
-        mongo::BSONObjBuilder mainbuilder;
+        // mongo::BSONObjBuilder mainbuilder;
 
-        this->mainBSONObj = mainbuilder.obj();
-
-        return;
+        // this->mainBSONObj = mainbuilder.obj();
 
     }
-
-
-    mongo::BSONObjBuilder builder;
-
-
-    builder.appendElements(this->mainBSONObj);
-
-    builder.append("timestep",value-1);
-
-    mongo::BSONObj tempObject = builder.obj();
-
-    std::vector< soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(tempObject,value-1);
-
-    ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
-
-    sensor_msgs::PointCloud2 state =  rosthread.getSOMA2CombinedObjectCloud(soma2objects);
-
-    rosthread.publishSOMA2ObjectCloud(state);
-
-
-    lastqueryjson = QString::fromStdString(tempObject.jsonString());
-    //Reset the bson obj
-   // mongo::BSONObjBuilder mainbuilder;
-
-   // this->mainBSONObj = mainbuilder.obj();
-
-
 }
 
 void MainWindow::handleMapInfoReceived()
@@ -135,6 +132,7 @@ void MainWindow::handleMapInfoReceived()
 
     // Enable the slider
     ui->timestepSlider->setEnabled(true);
+    ui->sliderCBox->setChecked(true);
 
 
     /*************Set Map Name***********************/
@@ -149,7 +147,7 @@ void MainWindow::handleMapInfoReceived()
 
     std::string objectscolname = this->rosthread.getSOMA2ObjectsCollectionName();
 
-   // MongoDBCXXInterface mongointerface(this->mongodbhost,this->mongodbport,objectsdbname,objectscolname);
+    // MongoDBCXXInterface mongointerface(this->mongodbhost,this->mongodbport,objectsdbname,objectscolname);
 
     std::vector<int> minmax = this->rosthread.getSOMA2CollectionMinMaxTimestep();
 
@@ -158,10 +156,10 @@ void MainWindow::handleMapInfoReceived()
 
 
 
-     QString labeltext ;
+    QString labeltext ;
     labeltext.append(QString::number(this->mintimestep+1));
     labeltext.append(" / ");
-   // QString labeltext =  "1 / ";
+    // QString labeltext =  "1 / ";
 
     labeltext.append(QString::number(this->maxtimestep+1));
 
@@ -212,7 +210,7 @@ void MainWindow::handleMapInfoReceived()
 
     //  std::vector<std::string>  res =  RosThread::fetchSOMA2ObjectLabels();
 
-  /*  std::vector<soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(this->mainBSONObj,0);
+    /*  std::vector<soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(this->mainBSONObj,0);
 
     ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
 
@@ -225,30 +223,94 @@ void MainWindow::handleMapInfoReceived()
 
 
 }
-void MainWindow::handleSOMA2ObjectLabels(std::vector<std::string> labelnames)
+void MainWindow::handleSOMA2ObjectTypes(std::vector<std::string> typenames)
 {
     QString dir = QDir::homePath();
 
-    dir.append("/").append(".soma2").append("/objectlabels.txt");
+    dir.append("/").append(".soma2").append("/objecttypes.txt");
 
     QFile file(dir);
 
-    if(file.open(QFile::ReadOnly)){
+    if(file.open(QFile::ReadOnly))
+    {
 
         QTextStream stream(&file);
 
 
-        ui->labelsComboBox->addItem("");
+        QStringListModel *model = new QStringListModel(this);
+
+        QStringList list;
+
+        // ui->listViewObjectTypes->setmo
 
         while(!stream.atEnd())
         {
             QString str = stream.readLine();
 
-            ui->labelsComboBox->addItem(str);
+            list<<str;
+
+            qDebug()<<str;
+
+            //ui->labelsComboBox->addItem(str);
 
         }
 
+        model->setStringList(list);
+
+        ui->listViewObjectTypes->setModel(model);
+        ui->listViewObjectTypes->setSelectionMode(QAbstractItemView::MultiSelection);
+        ui->listViewObjectTypes->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+        file.close();
+
     }
+
+
+
+    dir = QDir::homePath();
+
+    dir.append("/").append(".soma2").append("/objectids.txt");
+
+    QFile file2(dir);
+
+    if(file2.open(QFile::ReadOnly))
+    {
+
+        QTextStream stream(&file2);
+
+
+        QStringListModel *model = new QStringListModel(this);
+
+        QStringList list;
+
+        // ui->listViewObjectTypes->setmo
+
+        while(!stream.atEnd())
+        {
+            QString str = stream.readLine();
+
+            list<<str;
+
+            qDebug()<<str;
+
+            //ui->labelsComboBox->addItem(str);
+
+        }
+
+        model->setStringList(list);
+
+        ui->listViewObjectIDs->setModel(model);
+        ui->listViewObjectIDs->setSelectionMode(QAbstractItemView::MultiSelection);
+        ui->listViewObjectIDs->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+
+        file2.close();
+
+    }
+
+
+
+
 }
 void MainWindow::handleSOMA2ROINames(std::vector<SOMA2ROINameID> roinameids)
 {
@@ -278,7 +340,7 @@ void MainWindow::on_roiComboBox_currentIndexChanged(const QString &arg1)
     QStringList numpart = str.split(" ");
 
     if(numpart.size()>=2){
-       // qDebug()<<numpart[1];
+        // qDebug()<<numpart[1];
         rosthread.drawROIwithID(numpart[1].toStdString());
     }
     else
@@ -291,14 +353,17 @@ void MainWindow::on_queryButton_clicked()
 
     int weekdayindex = ui->weekdaysComboBox->currentIndex();
 
-    bool labelequals = ui->labelequalsCBox->isChecked();
 
-    bool labelcontains = ui->labelcontainsCBox->isChecked();
+    bool idequals = ui->listViewIDCBox->isChecked();
+
+    bool typeequals = ui->listViewObjectTypesCBox->isChecked();
+    /***********************************************************************/
+
+    bool slideractive = ui->sliderCBox->isChecked();
 
     bool lowertime = ui->lowerTimeCBox->isChecked();
 
     bool uppertime = ui->upperTimeCBox->isChecked();
-
 
     bool lowerdatecbox = ui->lowerDateCBox->isChecked();
 
@@ -308,7 +373,7 @@ void MainWindow::on_queryButton_clicked()
 
     if(lowerdatecbox || upperdatecbox)
     {
-            ui->timestepSlider->setEnabled(false);
+        // ui->timestepSlider->setEnabled(false);
 
         QDateTime datetime;
         datetime.setDate(ui->lowerDateEdit->date());
@@ -342,9 +407,6 @@ void MainWindow::on_queryButton_clicked()
         mainbuilder.appendElements(bsonobj);
 
 
-    } else
-    {
-        ui->timestepSlider->setEnabled(true);
     }
 
     if(lowertime || uppertime)
@@ -377,35 +439,115 @@ void MainWindow::on_queryButton_clicked()
 
         mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2WeekdayQuery(weekdayindex-1);
 
+
         mainbuilder.appendElements(bsonobj);
     }
 
 
-    if(labelequals)
+    if(typeequals || idequals)
     {
-        std::string labelname = ui->labelsComboBox->currentText().toStdString();
-        mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2LabelEqualsQuery(labelname);
+        if(typeequals && idequals)
+        {
+            QModelIndexList indexlist = ui->listViewObjectIDs->selectionModel()->selectedIndexes();
 
-        mainbuilder.appendElements(bsonobj);
-    }
-    else if(labelcontains)
-    {
-        std::string text = ui->labelcontainsLEdit->text().toStdString();
-        mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2LabelContainsQuery(text);
+            std::vector<std::string> list;
 
-        mainbuilder.appendElements(bsonobj);
+            std::vector<std::string> fieldnames;
+            std::vector<int> objectIndexes;
+            fieldnames.push_back("id");
+            fieldnames.push_back("type");
+
+
+
+
+            foreach(const QModelIndex& indx, indexlist)
+            {
+                QString data = indx.data().toString();
+
+                list.push_back(data.toStdString());
+            }
+
+            objectIndexes.push_back(indexlist.size());
+
+
+            indexlist = ui->listViewObjectTypes->selectionModel()->selectedIndexes();
+
+
+            foreach(const QModelIndex& indx, indexlist)
+            {
+                QString data = indx.data().toString();
+
+                list.push_back(data.toStdString());
+            }
+
+
+            objectIndexes.push_back(indexlist.size());
+
+            mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(list,fieldnames,objectIndexes,"$or");
+
+             mainbuilder.appendElements(bsonobj);
+
+        }
+        else if(typeequals){
+            QModelIndexList indexlist = ui->listViewObjectTypes->selectionModel()->selectedIndexes();
+
+            std::vector<std::string> list;
+
+            foreach(const QModelIndex& indx, indexlist)
+            {
+                QString data = indx.data().toString();
+
+                list.push_back(data.toStdString());
+            }
+
+            // std::string typename = ui->labelsComboBox->currentText().toStdString();
+            std::vector<std::string> fieldnames;
+            fieldnames.push_back("type");
+            std::vector<int> objectIndexes;
+            objectIndexes.push_back(list.size());
+            mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(list,fieldnames,objectIndexes,"$or");
+
+            mainbuilder.appendElements(bsonobj);
+        }
+        else if(idequals)
+        {
+            QModelIndexList indexlist = ui->listViewObjectIDs->selectionModel()->selectedIndexes();
+
+            std::vector<std::string> list;
+
+            foreach(const QModelIndex& indx, indexlist)
+            {
+                QString data = indx.data().toString();
+
+                list.push_back(data.toStdString());
+            }
+
+            // std::string typename = ui->labelsComboBox->currentText().toStdString();
+
+            std::vector<std::string> fieldnames;
+            fieldnames.push_back("id");
+            std::vector<int> objectIndexes;
+            objectIndexes.push_back(list.size());
+            mongo::BSONObj bsonobj = QueryBuilder::buildSOMA2StringArrayBasedQuery(list,fieldnames,objectIndexes,"$or");
+
+
+
+            mainbuilder.appendElements(bsonobj);
+        }
+
     }
+
 
 
     if(roiintindex > 0){
 
-      //  qDebug()<<"Current Index"<<roiintindex<<this->roinameids.size();
+        //  qDebug()<<"Current Index"<<roiintindex<<this->roinameids.size();
 
         QString roiindex = QString::fromStdString(this->roinameids[roiintindex-1].id);
 
         soma2_msgs::SOMA2ROIObject obj =  rosthread.getSOMA2ROIwithID(roiindex.toInt());
 
-      //  qDebug()<<"ROI Index"<<roiindex;
+        //  qDebug()<<"ROI Index"<<roiindex;
 
 
         // QueryBuilder builder;
@@ -418,40 +560,45 @@ void MainWindow::on_queryButton_clicked()
 
     }
 
-    this->mainBSONObj = mainbuilder.obj();
-
-    if(ui->timestepSlider->value() != mintimestep+1)
-        ui->timestepSlider->setValue(mintimestep+1);
-    else
-        emit ui->timestepSlider->valueChanged(mintimestep+1);
-    //  this->on_timestepSlider_valueChanged(1);
-
-
-
-    /*  std::vector<soma2_msgs::SOMA2Object> soma2objects =  rosthread.querySOMA2Objects(this->mainBSONObj,0);
-
-    if(soma2objects.size() > 0)
+    if(slideractive)
     {
 
-        rosthread.worldstate =  rosthread.getSOMA2ObjectClouds(soma2objects);
+        mongo::BSONObj timestepobj = QueryBuilder::buildSOMA2TimestepQuery(ui->timestepSlider->value()-1);
 
-        rosthread.publishSOMA2ObjectClouds(rosthread.worldstate);
+        mainbuilder.appendElements(timestepobj);
+
+    }
+
+    this->mainBSONObj = mainbuilder.obj();
+
+    mongo::BSONObj tempObject = this->mainBSONObj;
+
+    std::vector< soma2_msgs::SOMA2Object > soma2objects =  rosthread.querySOMA2Objects(tempObject);
+
+    ui->noretrievedobjectslabel->setText(QString::number(soma2objects.size()));
+
+    sensor_msgs::PointCloud2 state =  rosthread.getSOMA2CombinedObjectCloud(soma2objects);
+
+    rosthread.publishSOMA2ObjectCloud(state);
 
 
-    }*/
+    lastqueryjson = QString::fromStdString(tempObject.jsonString());
+
+
+
 }
 
-void MainWindow::on_labelequalsCBox_clicked(bool checked)
+/*void MainWindow::on_list_clicked(bool checked)
 {
     if(checked)
         ui->labelcontainsCBox->setChecked(false);
 }
 
-void MainWindow::on_labelcontainsCBox_clicked(bool checked)
+void MainWindow::on_typecontainsCBox_clicked(bool checked)
 {
     if(checked)
         ui->labelequalsCBox->setChecked(false);
-}
+}*/
 
 // Reset the Query Fields
 void MainWindow::on_resetqueryButton_clicked()
@@ -460,11 +607,13 @@ void MainWindow::on_resetqueryButton_clicked()
 
     ui->weekdaysComboBox->setCurrentIndex(0);
 
-    ui->labelsComboBox->setCurrentIndex(0);
 
-    ui->labelequalsCBox->setChecked(false);
+    ui->sliderCBox->setChecked(true);
 
-    ui->labelcontainsCBox->setChecked(false);
+
+    ui->listViewObjectTypesCBox->setChecked(false);
+
+    ui->listViewIDCBox->setChecked(false);
 
     ui->lowerTimeCBox->setChecked(false);
 
@@ -474,7 +623,9 @@ void MainWindow::on_resetqueryButton_clicked()
 
     ui->upperDateCBox->setChecked(false);
 
-    ui->labelcontainsLEdit->setText("");
+    ui->listViewObjectTypes->clearSelection();
+
+    ui->listViewObjectIDs->clearSelection();
 
 
 
@@ -517,20 +668,46 @@ void MainWindow::on_exportjsonButton_clicked()
 
     if(index > 0 )
     {
-       lastqueryjson = lastqueryjson.insert(index-1," new ");
+        lastqueryjson = lastqueryjson.insert(index-1," new ");
 
     }
     if(lastindex > 0)
     {
-         lastqueryjson = lastqueryjson.insert(lastindex-1," new ");
+        lastqueryjson = lastqueryjson.insert(lastindex-1," new ");
     }
 
-  /**********************************************************************************************************/
+    /**********************************************************************************************************/
 
     browser->setText(lastqueryjson);
 
     dialog->show();
 
     dialog->setWindowTitle("Query JSON");
+
+}
+
+void MainWindow::on_sliderCBox_clicked(bool checked)
+{
+    if(checked){
+
+        ui->lowerDateCBox->setChecked(false);
+        ui->upperDateCBox->setChecked(false);
+    }
+
+}
+
+
+
+void MainWindow::on_upperDateCBox_clicked(bool checked)
+{
+    if(checked)
+        ui->sliderCBox->setChecked(false);
+
+}
+
+void MainWindow::on_lowerDateCBox_clicked(bool checked)
+{
+    if(checked)
+        ui->sliderCBox->setChecked(false);
 
 }

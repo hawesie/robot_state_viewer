@@ -72,14 +72,14 @@ void RosThread::loop()
 
     qDebug()<<"Ros Thread is running!!";
 
-    ros::ServiceClient client = n.serviceClient<soma2_map_manager::MapInfo>("soma2/map_info");
+    ros::ServiceClient client = n.serviceClient<soma_map_manager::MapInfo>("soma2/map_info");
 
-    this->roiclient = n.serviceClient<soma2_roi_manager::DrawROI>("soma2/draw_roi");
+    this->roiclient = n.serviceClient<soma_roi_manager::DrawROI>("soma2/draw_roi");
 
-    soma2_map_manager::MapInfo srv;
+    soma_map_manager::MapInfo srv;
     srv.request.request = 0;
 
-    qDebug()<<"Waiting for map_info service from soma2_map_manager";
+    qDebug()<<"Waiting for map_info service from soma_map_manager";
 
     client.waitForExistence();
     if (client.call(srv))
@@ -105,7 +105,7 @@ void RosThread::loop()
    // if(this->roibdname.size() > 0)
     this->fetchSOMA2ROINames();
 
-    this->fetchSOMA2ObjectLabels();
+    this->fetchSOMA2ObjectTypesIDs();
 
     emit mapinfoReceived();
 
@@ -135,7 +135,7 @@ void RosThread::loop()
 void RosThread::drawROIwithID(std::string id)
 {
 
-    soma2_roi_manager::DrawROI drawroi;
+    soma_roi_manager::DrawROI drawroi;
 
     drawroi.request.map_name = this->map_name;
     drawroi.request.roi_id = id;
@@ -152,7 +152,7 @@ void RosThread::shutdownROS()
 
 
 }
-void RosThread::fetchSOMA2ObjectLabels()
+void RosThread::fetchSOMA2ObjectTypesIDs()
 {
     ros::NodeHandle nl;
 
@@ -165,20 +165,37 @@ void RosThread::fetchSOMA2ObjectLabels()
 
     dir.append("/").append(".soma2/");
 
-    QDir labelsdir;
+    QDir typesdir;
 
-    if(!labelsdir.exists(dir))
-        labelsdir.mkdir(dir);
+    if(!typesdir.exists(dir))
+        typesdir.mkdir(dir);
 
-    QString filename = "objectlabels.txt";
+    QString filename = "objecttypes.txt";
 
-    dir.append(filename);
+    QString filename2 = "objectids.txt";
 
-    QFile file(dir);
+    QString objecttypesdir = dir;
+    QString idsdir = dir;
+
+    objecttypesdir.append(filename);
+
+    idsdir.append(filename2);
+
+    QFile file(objecttypesdir);
 
     if(!file.open(QFile::WriteOnly))
     {
-        qDebug()<<"Cannot Open labels file! Returning...";
+        qDebug()<<"Cannot Open types file! Returning...";
+        return ;
+
+
+    }
+
+    QFile file2(idsdir);
+
+    if(!file2.open(QFile::WriteOnly))
+    {
+        qDebug()<<"Cannot Open types file! Returning...";
         return ;
 
 
@@ -187,8 +204,11 @@ void RosThread::fetchSOMA2ObjectLabels()
     // Query all objects,
     soma2store.query(soma2objects);
 
-    // List that stores the object labels
-    QStringList ls;
+    // List that stores the object types
+    QStringList typesls;
+
+    // List that stores the object ids
+    QStringList idsls;
 
     nl.shutdown();
 
@@ -201,15 +221,20 @@ void RosThread::fetchSOMA2ObjectLabels()
         {
             QString str;
 
+            QString str2;
+
 
 
             //   spr = soma2objects[i];
 
             str.append(QString::fromStdString(soma2objects[i]->type));
 
+            str2.append(QString::fromStdString(soma2objects[i]->id));
 
 
-            ls.append(str);
+            typesls.append(str);
+
+            idsls.append(str2);
 
 
 
@@ -223,15 +248,27 @@ void RosThread::fetchSOMA2ObjectLabels()
 
 
     // Remove duplicate names
-    ls.removeDuplicates();
+    typesls.removeDuplicates();
 
-    // Sort the labels
-    ls.sort(Qt::CaseInsensitive);
+    // Sort the types
+   // typesls.sort(Qt::CaseInsensitive);
+
+
+    QCollator collator;
+    collator.setNumericMode(true);
+
+    std::sort(
+        typesls.begin(),
+        typesls.end(),
+        [&collator](const QString &file1, const QString &file2)
+        {
+            return collator.compare(file1, file2) < 0;
+        });
 
 
     QTextStream stream(&file);
 
-    foreach(QString st, ls)
+    foreach(QString st, typesls)
     {
         stream<<st<<"\n";
 
@@ -250,6 +287,43 @@ void RosThread::fetchSOMA2ObjectLabels()
 
     file.close();
 
+    // Remove duplicate names
+    idsls.removeDuplicates();
+
+    // Sort the ids
+   // idsls.sort(Qt::CaseInsensitive);
+
+
+    std::sort(
+        idsls.begin(),
+        idsls.end(),
+        [&collator](const QString &file1, const QString &file2)
+        {
+            return collator.compare(file1, file2) < 0;
+        });
+
+
+    QTextStream stream2(&file2);
+
+    foreach(QString st, idsls)
+    {
+        stream2<<st<<"\n";
+
+        // Dump data to array
+        // res[count].append(st.toStdString());
+
+        // Then transfer it into vector
+        //  soma2labels.push_back(res[count]);
+
+        // this->labelnames.push_back(res[count]);
+
+        //  count++;
+        // qDebug()<<st;
+    }
+
+
+    file2.close();
+
 
 
     /* std::sort(res.begin(), res.end());
@@ -261,7 +335,7 @@ void RosThread::fetchSOMA2ObjectLabels()
     //res.resize( std::distance(res.begin(),it) );
 
 
-    emit SOMA2ObjectLabels(soma2labels);
+    emit SOMA2ObjectTypes(soma2labels);
 
     return ;
 
@@ -474,7 +548,7 @@ void RosThread::publishSOMA2ObjectCloud(sensor_msgs::PointCloud2 msg)
 
 
 }
-std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2ObjectsWithDate(const mongo::BSONObj &queryobj)
+/*std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2ObjectsWithDate(const mongo::BSONObj &queryobj)
 {
 
     ros::NodeHandle nl;
@@ -518,8 +592,8 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2ObjectsWithDate(const 
 
     return res;
 
-}
-std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(mongo::BSONObj &queryobj, int timestep)
+}*/
+std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(const mongo::BSONObj &queryobj)
 {
 
     ros::NodeHandle nl;
@@ -528,21 +602,12 @@ std::vector<soma2_msgs::SOMA2Object> RosThread::querySOMA2Objects(mongo::BSONObj
 
 
     std::vector<soma2_msgs::SOMA2Object> res;
-    //  std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > res;
 
-
-  //  mongo::BSONObjBuilder builder;
-
-
-  //  builder.appendElements(queryobj);
-
-
-   // builder.append("timestep",timestep);
 
 
     std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > soma2objects;
 
-  //  queryobj = builder.obj();
+
 
     soma2store.query(soma2objects,queryobj);
 

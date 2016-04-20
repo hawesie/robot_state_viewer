@@ -28,7 +28,7 @@ mongo::BSONObj QueryBuilder::buildSOMA2DateQuery(ulong lowerdate, ulong upperdat
 
     mongo::BSONObjBuilder builder2;
 
-   // std::cout<<mode<<std::endl;
+    // std::cout<<mode<<std::endl;
 
     if(mode == 0)
     {
@@ -62,24 +62,80 @@ mongo::BSONObj QueryBuilder::buildSOMA2DateQuery(ulong lowerdate, ulong upperdat
 
     }
 
- //  qDebug()<<QString::fromStdString(builder.obj().jsonString());
+    //  qDebug()<<QString::fromStdString(builder.obj().jsonString());
 
     builder2.append("timestamp",builder.obj());
 
-   // obj<<"timestamp"<<builder.ob();
+    // obj<<"timestamp"<<builder.ob();
 
 
     return builder2.obj();
 
 }
-mongo::BSONObj QueryBuilder::buildSOMA2LabelEqualsQuery(const std::string &labelname)
+
+mongo::BSONObj QueryBuilder::buildSOMA2TimestepQuery(int timestep)
 {
+    mongo::BSONObjBuilder builder;
+
+    builder.append("timestep",timestep);
+
+    return builder.obj();
+
+}
+
+/*mongo::BSONObj QueryBuilder::buildSOMA2TypeEqualsQuery(const std::vector<std::string>& typelist)
+{
+
+
+    mongo::BSONArrayBuilder arrbuilder;
+
+    for(int i = 0; i < typelist.size(); i++)
+    {
+        mongo::BSONObjBuilder builder;
+
+        builder.append("type",typelist[i].data());
+
+        arrbuilder.append(builder.obj());
+
+    }
 
     mongo::BSONObjBuilder builder;
 
-    builder.append("type",labelname.data());
+    builder.append("$or",arrbuilder.arr());
+
 
     return builder.obj();
+
+}*/
+mongo::BSONObj QueryBuilder::buildSOMA2StringArrayBasedQuery(const std::vector<std::string> &list, std::vector<std::string> fieldnames, std::vector<int> objectIndexes, std::string arrayOperator)
+{
+
+    std::vector<int> realIndexes;
+    realIndexes.push_back(0);
+
+    realIndexes.insert(realIndexes.end(),objectIndexes.begin(),objectIndexes.end());
+
+    mongo::BSONArrayBuilder arrbuilder;
+
+    for(int j = 0 ;j < fieldnames.size(); j++){
+
+        for(int i = realIndexes[j]; i < realIndexes[j]+objectIndexes[j]; i++)
+        {
+            mongo::BSONObjBuilder builder;
+
+            builder.append(fieldnames[j],list[i].data());
+
+            arrbuilder.append(builder.obj());
+
+        }
+    }
+    mongo::BSONObjBuilder builder;
+
+    builder.append(arrayOperator,arrbuilder.arr());
+
+
+    return builder.obj();
+
 
 }
 mongo::BSONObj QueryBuilder::buildSOMA2TimeQuery(int lowerhour,int lowerminute, int upperhour, int upperminute,  int mode)
@@ -103,12 +159,12 @@ mongo::BSONObj QueryBuilder::buildSOMA2TimeQuery(int lowerhour,int lowerminute, 
         lowerhourbuilder.append("$gte",totalminutes);
         hourbuilder.append("logtimeminutes",lowerhourbuilder.obj());
 
-     /*   lowerminutebuilder.append("$gte",lowerminute);
+        /*   lowerminutebuilder.append("$gte",lowerminute);
 
         minutebuilder.append("logminute",lowerminutebuilder.obj());*/
 
         builder.appendElements(hourbuilder.obj());
-      /*  builder.appendElements(minutebuilder.obj());*/
+        /*  builder.appendElements(minutebuilder.obj());*/
 
 
     }
@@ -152,7 +208,7 @@ mongo::BSONObj QueryBuilder::buildSOMA2TimeQuery(int lowerhour,int lowerminute, 
 }
 mongo::BSONObj QueryBuilder::buildSOMA2WeekdayQuery(int index)
 {
-   // std::stringstream ss;
+    // std::stringstream ss;
     //ss<<index;
 
     mongo::BSONObjBuilder builder;
@@ -175,7 +231,7 @@ mongo::BSONObj QueryBuilder::buildSOMA2ROIWithinQuery(const soma2_msgs::SOMA2ROI
 
         mongo::BSONArrayBuilder b2;
 
-       geometry_msgs::Pose apose = roiobj.geoposearray.poses[i];
+        geometry_msgs::Pose apose = roiobj.geoposearray.poses[i];
 
 
         b2.append(apose.position.x);
@@ -190,7 +246,7 @@ mongo::BSONObj QueryBuilder::buildSOMA2ROIWithinQuery(const soma2_msgs::SOMA2ROI
 
     b3.append(b.arr());
 
-  // qDebug()<<QString::fromStdString(b3.obj().jsonString());
+    // qDebug()<<QString::fromStdString(b3.obj().jsonString());
 
     mongo::BSONObjBuilder builder;
 
@@ -204,13 +260,13 @@ mongo::BSONObj QueryBuilder::buildSOMA2ROIWithinQuery(const soma2_msgs::SOMA2ROI
 
     builder3.append("$geometry",builder2.obj());
 
-  //  qDebug()<<QString::fromStdString(builder3.obj().jsonString());
+    //  qDebug()<<QString::fromStdString(builder3.obj().jsonString());
 
     mongo::BSONObjBuilder builder4;
 
     builder4.append("$geoWithin",builder3.obj());
 
-   // qDebug()<<QString::fromStdString(builder4.obj().jsonString());
+    // qDebug()<<QString::fromStdString(builder4.obj().jsonString());
 
 
 

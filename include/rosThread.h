@@ -1,13 +1,14 @@
 #include <QThread>
 #include <ros/ros.h>
 #include <QVector>
+#include <QCollator>
 #include <mongodb_store/MongoFind.h>
 #include <mongodb_store/message_store.h>
 #include <mongo/bson/bson.h>
 #include <soma2_msgs/SOMA2Object.h>
-#include <soma2_map_manager/MapInfo.h>
+#include <soma_map_manager/MapInfo.h>
 #include <soma2_msgs/SOMA2ROIObject.h>
-#include <soma2_roi_manager/DrawROI.h>
+#include <soma_roi_manager/DrawROI.h>
 #include <algorithm>    // std::unique, std::distance
 #include <vector>       // std::vector
 
@@ -59,10 +60,10 @@ public:
      soma2_msgs::SOMA2ROIObject getSOMA2ROIwithID(int id);
 
      // Query the SOMA2 objects
-     std::vector<soma2_msgs::SOMA2Object> querySOMA2Objects(mongo::BSONObj& queryobj, int timestep);
+     std::vector<soma2_msgs::SOMA2Object> querySOMA2Objects(const mongo::BSONObj& queryobj);
 
      // Query the SOMA2 objects using timeinterval
-     std::vector<soma2_msgs::SOMA2Object> querySOMA2ObjectsWithDate(const mongo::BSONObj& queryobj);
+  //   std::vector<soma2_msgs::SOMA2Object> querySOMA2ObjectsWithDate(const mongo::BSONObj& queryobj);
 
      // Set the DB name for SOMA2 objects
      void setSOMA2ObjectsDBName(std::string name);
@@ -103,7 +104,7 @@ private:
      void fetchSOMA2ROINames();
 
      // Get the object labels from db
-     void fetchSOMA2ObjectLabels();
+     void fetchSOMA2ObjectTypesIDs();
 
 
      std::string map_name;
@@ -121,7 +122,8 @@ signals:
    void  rosStartFailed();
    void  rosFinished();
    void  mapinfoReceived();
-   void  SOMA2ObjectLabels(std::vector<std::string>);
+   void  SOMA2ObjectTypes(std::vector<std::string>);
+   void  SOMA2ObjectIDs(std::vector<std::string>);
    void  SOMA2ROINames(std::vector<SOMA2ROINameID>);
 
 public slots:
