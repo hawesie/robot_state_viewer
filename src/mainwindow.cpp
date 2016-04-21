@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->mapnamelabel->setText("DB Fetch is in progress...");
 
+    this->setWindowTitle("Robot State Viewer");
+
     // this->mongodbhost = "localhost";
     // this->mongodbport = "62345";
 
