@@ -16,6 +16,8 @@ typedef pcl::PointCloud<PointType> Cloud;
 typedef typename Cloud::Ptr CloudPtr;
 
 
+
+
 RosThread::RosThread()/*:soma2messagestore(n,"soma2","labelled_objects"),soma2messagestoreROI(n,"soma2_roi","message_store")*/
 {
     shutdown = false;
@@ -340,7 +342,8 @@ void RosThread::fetchSOMA2ObjectTypesIDs()
     return ;
 
 }
-std::vector<int> RosThread::getSOMA2CollectionMinMaxTimestep()
+// Obsolete
+/*std::vector<int> RosThread::getSOMA2CollectionMinMaxTimestep()
 {
     std::vector<int> res;
     int min = -1;
@@ -374,7 +377,7 @@ std::vector<int> RosThread::getSOMA2CollectionMinMaxTimestep()
 
     return res;
 
-}
+}*/
 void RosThread::fetchSOMA2ROINames()
 {
     // std::vector<SOMA2ROINameID> res;
@@ -541,6 +544,48 @@ std::string RosThread::getSOMA2ObjectDateWithTimestep(int timestep)
 
 
     return date;
+}
+SOMA2TimeLimits RosThread::getSOMA2CollectionMinMaxTimelimits()
+{
+
+
+    SOMA2TimeLimits limits;
+    limits.mintimestamp = -1;
+    limits.mintimestep = -1;
+    limits.maxtimestamp = -1;
+    limits.maxtimestep = -1;
+
+    ros::NodeHandle nl;
+
+    mongodb_store::MessageStoreProxy soma2store(nl,objectscollectionname,objectsdbname);
+
+    mongo::BSONObjBuilder builder;
+
+    builder.append("$natural",-1);
+
+    std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > soma2objects;
+
+    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),builder.obj(),false,1);
+
+
+    if(soma2objects.size() > 0){
+        limits.maxtimestep = soma2objects[0]->timestep;
+        limits.maxtimestamp = soma2objects[0]->logtimestamp;
+    }
+    //std::cout<<soma2objects[0]->timestep<<std::endl;
+
+    soma2objects.clear();
+    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),mongo::BSONObj(),false,1);
+
+    if(soma2objects.size() > 0)
+    {
+
+        limits.mintimestep = soma2objects[0]->timestep;
+        limits.mintimestamp = soma2objects[0]->logtimestamp;
+    }
+
+    return limits;
+
 }
 void RosThread::publishSOMA2ObjectCloud(sensor_msgs::PointCloud2 msg)
 {

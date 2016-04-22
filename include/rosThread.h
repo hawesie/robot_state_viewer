@@ -19,6 +19,16 @@ struct SOMA2ROINameID{
 
 };
 
+struct SOMA2TimeLimits{
+
+    int maxtimestep;
+    int mintimestep;
+
+    long mintimestamp;
+    long maxtimestamp;
+
+};
+
 
 class RosThread:public QObject
 {
@@ -79,10 +89,13 @@ public:
      // Get the collection name for SOMA2 objects
      std::string getSOMA2ObjectsCollectionName();
 
+	
+     SOMA2TimeLimits getSOMA2CollectionMinMaxTimelimits();
+
 
      std::string getROIDBName();
 
-     std::vector<int> getSOMA2CollectionMinMaxTimestep();
+   //  std::vector<int> getSOMA2CollectionMinMaxTimestep();
 
     // std::vector<std::string> getSOMA2ObjectLabels();
 

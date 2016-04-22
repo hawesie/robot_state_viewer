@@ -151,11 +151,21 @@ void MainWindow::handleMapInfoReceived()
 
     // MongoDBCXXInterface mongointerface(this->mongodbhost,this->mongodbport,objectsdbname,objectscolname);
 
-    std::vector<int> minmax = this->rosthread.getSOMA2CollectionMinMaxTimestep();
+    //std::vector<int> minmax = this->rosthread.getSOMA2CollectionMinMaxTimestep();
 
-    this->mintimestep = minmax[0];
-    this->maxtimestep = minmax[1];
+    SOMA2TimeLimits res = this->rosthread.getSOMA2CollectionMinMaxTimelimits();
 
+
+    this->mintimestep = res.mintimestep;
+    this->maxtimestep = res.maxtimestep;
+
+    qint64 val = res.mintimestamp*1000;
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(val,Qt::UTC);
+    ui->lowerDateEdit->setDate(dt.date());
+
+    val = res.maxtimestamp*1000;
+    dt = QDateTime::fromMSecsSinceEpoch(val,Qt::UTC);
+    ui->upperDateEdit->setDate(dt.date());
 
 
     QString labeltext ;
@@ -175,11 +185,11 @@ void MainWindow::handleMapInfoReceived()
 
 
     /****************************** Set Dates to Min/Max Values **********************/
-    std::string date = rosthread.getSOMA2ObjectDateWithTimestep(this->mintimestep);
+ /*   std::string date = rosthread.getSOMA2ObjectDateWithTimestep(this->mintimestep);
 
     QDateTime qdate = QDateTime::fromString(QString::fromStdString(date),Qt::ISODate);
 
-    ui->lowerDateEdit->setDate(qdate.date());
+   // ui->lowerDateEdit->setDate(qdate.date());
 
     ui->datelabel->setText(QString::fromStdString(date));
 
@@ -187,7 +197,7 @@ void MainWindow::handleMapInfoReceived()
 
     qdate = QDateTime::fromString(QString::fromStdString(date),Qt::ISODate);
 
-    ui->upperDateEdit->setDate(qdate.date());
+    ui->upperDateEdit->setDate(qdate.date());*/
     /*********************************************************************************/
 
     /********************** Prepare the Weekdays ComboBox ****************************/
