@@ -565,12 +565,25 @@ SOMA2TimeLimits RosThread::getSOMA2CollectionMinMaxTimelimits()
 
     std::vector<boost::shared_ptr<soma2_msgs::SOMA2Object> > soma2objects;
 
-    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),builder.obj(),false,1);
+    soma2store.query(soma2objects,mongo::BSONObj(),mongo::BSONObj(),builder.obj(),false);
 
 
-    if(soma2objects.size() > 0){
-        limits.maxtimestep = soma2objects[0]->timestep;
-        limits.maxtimestamp = soma2objects[0]->logtimestamp;
+    if(soma2objects.size() > 0)
+    {
+        int maxindex = 0;
+        int max = 0;
+        for(int i = 0; i < soma2objects.size(); i++)
+        {
+            if(max < soma2objects[i]->timestep){
+                max = soma2objects[i]->timestep;
+                maxindex = i;
+            }
+
+        }
+
+
+        limits.maxtimestep = soma2objects[maxindex]->timestep;
+        limits.maxtimestamp = soma2objects[maxindex]->logtimestamp;
     }
     //std::cout<<soma2objects[0]->timestep<<std::endl;
 
@@ -579,6 +592,7 @@ SOMA2TimeLimits RosThread::getSOMA2CollectionMinMaxTimelimits()
 
     if(soma2objects.size() > 0)
     {
+
 
         limits.mintimestep = soma2objects[0]->timestep;
         limits.mintimestamp = soma2objects[0]->logtimestamp;
