@@ -7,7 +7,7 @@ project(robot_state_viewer)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  std_msgs sensor_msgs pcl_ros mongodb_store soma2_msgs nav_msgs
+  std_msgs sensor_msgs pcl_ros mongodb_store soma2_msgs nav_msgs soma_map_manager soma_roi_manager
 )
 
 set(CMAKE_BUILD_TYPE Release)
